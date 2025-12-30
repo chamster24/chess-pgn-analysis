@@ -18,11 +18,17 @@
 
     
     <div id="analysis-area" style="flex: 4; display: flex; flex-direction: column; padding: 20px; border-left: 1px solid #ccc; background: white;">
-      
-      <div id="results" style="flex-grow: 1; overflow-y: auto; border-top: 1px solid #eee; padding-top: 10px;">
-        <p style="color: #888;">Moves and AI ratings will appear here...</p>
-      </div>
 
+	    <div id="results" style="display: flex; flex-direction: row;">
+        <div id="ai-review" style="height: 30%; min-height: 100px; padding: 15px; background: #f9f9f9; border-bottom: 2px solid #eee; overflow-y: auto;">
+          <p style="color: #888;">AI analysis for each move will appear here...</p>
+        </div>
+        
+        <div id="pgn" style="flex-grow: 1; overflow-y: auto; border-top: 1px solid #eee; padding-top: 10px;">
+          <p style="color: #888;">Moves will appear here...</p>
+        </div>
+      </div>
+      
       <div id="controls">
         <textarea id="pgn-input" placeholder="Paste PGN here..." style="width: 100%; height: 15%; padding: 10px; resize: none; flex-shrink: 0;"></textarea>
 
