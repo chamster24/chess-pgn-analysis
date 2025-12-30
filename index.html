@@ -61,15 +61,44 @@
     <p style="text-align: center;">&copy; 2025 cHamster24. All rights reserved. | <a href="https://github.com/chamster24/chess-pgn-analysis/">Github</a></p>
   </footer>
 
-  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
   <script>
-    const slider = document.getElementById('depth-slider');
+    const game = new Chess();
+    const engine = new Worker('https://nmrugg.github.io/stockfish.js/stockfish.js');
+    
+    const depth_slider = document.getElementById('depth-slider');
     const depthLabel = document.getElementById('depth-value');
+	  const analyze_btn = document.getElementById('analyze-btn');
 
-    // Update the number on the screen every time the user moves the slider
-    slider.oninput = function() {
-      depthLabel.innerHTML = this.value;
+    function analizegame() {
+      
     }
+    
+    // Update the number on the screen every time the user moves the slider
+    depth_slider.oninput = function() {
+      depthLabel.innerHTML = this.value;
+    };
+    // Check if stockfish is up and running
+    engine.postMessage('uci');
+    engine.onmessage = function(event) {
+      if (event.data === "uciok") {
+        engineReady = true;
+        console.log("Engine is ready to go!");
+      }
+    };
+    // Check for valid PGN on button click
+    analyze_btn.addEventListener('click', funcution() {
+      const isValid = new Chess().load_pgn(document.getElementById('pgn-input').value);
+      if (!isValid) {
+        alert("Invalid PGN!")
+      } else {
+        if (!engineReady === true) {
+          alert("Error with stockfish!")
+        } else {
+          analizegame()
+        }
+      }
+    });
   </script>
 </body>
 </html>
