@@ -50,7 +50,13 @@
 
   
   <script>
-    
+    const slider = document.getElementById('depth-slider');
+    const depthLabel = document.getElementById('depth-value');
+
+    // Update the number on the screen every time the user moves the slider
+    slider.oninput = function() {
+      depthLabel.innerHTML = this.value;
+    }
   </script>
 </body>
 </html>
