@@ -177,12 +177,24 @@
         }]
       };
 
+    // 1. DEBUG
+    try {
+      const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`;
+      const listResponse = await fetch(listUrl);
+      const listData = await listResponse.json();
+      console.log("--- ALLOWED MODELS FOR YOUR KEY ---");
+      console.log(listData);
+    } catch (e) {
+      console.log("Could not fetch model list:", e);
+    }
+      
       try {
         const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody)
       });
+        
       const result = await response.json();
       // log the response to check for errors
 	    console.log("Gemini Response:", result);
@@ -205,10 +217,6 @@
         console.error("Gemini Error:", error);
         document.getElementById('ai-review').innerHTML = "AI Review failed. Check the console.";
       }
-	    //Temp for debugging
-      fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`)
-        .then(response => response.json())
-        .then(data => console.log("YOUR ALLOWED MODELS:", data));
     }
   </script>
 </body>
