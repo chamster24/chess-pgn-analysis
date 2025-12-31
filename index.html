@@ -168,7 +168,8 @@
     });
 
     async function callGemini(fullGameData) {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`;
+	    const modelName = "gemini-2.5-flash"
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${API_KEY}`;
       const requestBody = {
         contents: [{
           parts: [{
@@ -176,17 +177,6 @@
           }]
         }]
       };
-
-    // 1. DEBUG
-    try {
-      const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`;
-      const listResponse = await fetch(listUrl);
-      const listData = await listResponse.json();
-      console.log("--- ALLOWED MODELS FOR YOUR KEY ---");
-      console.log(listData);
-    } catch (e) {
-      console.log("Could not fetch model list:", e);
-    }
       
       try {
         const response = await fetch(url, {
