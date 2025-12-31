@@ -61,7 +61,6 @@
     <p style="text-align: center;">&copy; 2025 cHamster24. All rights reserved. | <a href="https://github.com/chamster24/chess-pgn-analysis/">Github</a></p>
   </footer>
 
-  <script src="key.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
   <script>
     const game = new Chess();
@@ -168,44 +167,40 @@
     });
 
     async function callGemini(fullGameData) {
-	    const modelName = "gemini-2.5-flash"
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${API_KEY}`;
-      const requestBody = {
-        contents: [{
-          parts: [{
-            text: "Analyze this chess game JSON. 'cp' is the score after the move, 'pcp' is the score before. Identify each move and blunders (big drops in score) and explain why they happened. Format as a short message for each move, and add it next to the PGN's comments section. Data: " + JSON.stringify(fullGameData)
-          }]
-        }]
-      };
-      
-      try {
-        const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      });
-        
-      const result = await response.json();
-      // log the response to check for errors
-	    console.log("Gemini Response:", result);
+      document.getElementById('ai-review').innerHTML = "AI is thinking...";
 
-      if (result.error) {
-        document.getElementById('ai-review').innerHTML = `<b>API Error:</b> ${result.error.message}`;
-        return;
-      }
-      if (result.candidates && result.candidates.length > 0) {
-        const aiText = result.candidates[0].content.parts[0].text;
-        // Convert AI markdown-style breaks to HTML breaks
-        document.getElementById('ai-review').innerHTML = `<div style="line-height:1.5">${aiText.replace(/\n/g, '<br>')}</div>`;
-      } else {
-        document.getElementById('ai-review').innerHTML = "AI returned no suggestions. Check console.";
-      }
-      // Display the AI's words in the ai-review box
-      const aiText = result.candidates[0].content.parts[0].text;
-      document.getElementById('ai-review').innerHTML = `<div style="line-height:1.5">${aiText}</div>`;
+      try {
+        const vercelUrl = 'https://chess-pgn-analysis.vercel.app/api'; 
+
+        // 2. Send the chess data to the Python function
+        const response = await fetch(vercelUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(fullGameData)
+        });
+
+        const result = await response.json();
+
+        // 3. Error check: see if Python or Gemini had a problem
+        if (result.error) {
+          document.getElementById('ai-review').innerHTML = `<b>Backend Error:</b> ${result.error}`;
+          return;
+        }
+
+        // 4. Get the text from the Gemini response format
+        const aiText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (aiText) {
+          // Show the analysis and fix line breaks
+          document.getElementById('ai-review').innerHTML = 
+          `<div style="line-height:1.6;">${aiText.replace(/\n/g, '<br>')}</div>`;
+        } else {
+          document.getElementById('ai-review').innerHTML = "AI returned no text. Check Vercel logs.";
+        }
+
       } catch (error) {
-        console.error("Gemini Error:", error);
-        document.getElementById('ai-review').innerHTML = "AI Review failed. Check the console.";
+        console.error("Connection Error:", error);
+        document.getElementById('ai-review').innerHTML = "Could not reach Python backend. Check console.";
       }
     }
   </script>
