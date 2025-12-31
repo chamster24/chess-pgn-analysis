@@ -184,7 +184,20 @@
         body: JSON.stringify(requestBody)
       });
       const result = await response.json();
-    
+      // log the response to check for errors
+	    console.log("Gemini Response:", result);
+
+      if (result.error) {
+        document.getElementById('ai-review').innerHTML = `<b>API Error:</b> ${result.error.message}`;
+        return;
+      }
+      if (result.candidates && result.candidates.length > 0) {
+        const aiText = result.candidates[0].content.parts[0].text;
+        // Convert AI markdown-style breaks to HTML breaks
+        document.getElementById('ai-review').innerHTML = `<div style="line-height:1.5">${aiText.replace(/\n/g, '<br>')}</div>`;
+      } else {
+        document.getElementById('ai-review').innerHTML = "AI returned no suggestions. Check console.";
+      }
       // Display the AI's words in the ai-review box
       const aiText = result.candidates[0].content.parts[0].text;
       document.getElementById('ai-review').innerHTML = `<div style="line-height:1.5">${aiText}</div>`;
