@@ -168,7 +168,7 @@
     });
 
     async function callGemini(fullGameData) {
-      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`;
       const requestBody = {
         contents: [{
           parts: [{
@@ -205,6 +205,10 @@
         console.error("Gemini Error:", error);
         document.getElementById('ai-review').innerHTML = "AI Review failed. Check the console.";
       }
+	    //Temp for debugging
+      fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`)
+        .then(response => response.json())
+        .then(data => console.log("YOUR ALLOWED MODELS:", data));
     }
   </script>
 </body>
