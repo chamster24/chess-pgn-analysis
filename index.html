@@ -61,6 +61,7 @@
     <p style="text-align: center;">&copy; 2025 cHamster24. All rights reserved. | <a href="https://github.com/chamster24/chess-pgn-analysis/">Github</a></p>
   </footer>
 
+  <script src="key.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
   <script>
     const game = new Chess();
@@ -125,10 +126,14 @@
         const parts = line.split(" ");
         const scoreIndex = parts.indexOf("cp");
         if (scoreIndex !== -1) {
-            analysisResults[currentMoveIndex].cp = parseInt(parts[scoreIndex + 1]);
+          analysisResults[currentMoveIndex].cp = parseInt(parts[scoreIndex + 1]);
         } else if (line.includes("mate")) {
-            const mateIndex = parts.indexOf("mate");
-            analysisResults[currentMoveIndex].cp = `M${parts[mateIndex + 1]}`;
+          const mateIndex = parts.indexOf("mate");
+          const mateValue = parseInt(parts[mateIndex + 1]);
+          //old - mate in #
+          analysisResults[currentMoveIndex].cp = `M${parts[mateIndex + 1]}`;
+          //convert mate to a very high cp score
+          analysisResults[currentMoveIndex].cp = mateValue > 0 ? 10000 : -10000;
         }
       }
       if (line.startsWith("bestmove")) {
@@ -150,7 +155,7 @@
     // Check for valid PGN on button click, before running a game check
     analyze_btn.addEventListener('click', function() {
       const pgnText = document.getElementById('pgn-input').value;
-      const isValid = game.load_pgn(pgnInput);
+      const isValid = game.load_pgn(pgnText);
       if (!isValid) {
         alert("Invalid PGN!")
       } else {
