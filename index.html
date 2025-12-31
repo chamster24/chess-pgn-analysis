@@ -65,7 +65,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
   <script>
     const game = new Chess();
-    const engine = new Worker('https://nmrugg.github.io/stockfish.js/stockfish.js');
+    const engine = new Worker('stockfish.js');
     
     const depth_slider = document.getElementById('depth-slider');
     const depthLabel = document.getElementById('depth-value');
