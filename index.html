@@ -127,6 +127,7 @@
     };
     
     engine.postMessage('uci');
+	let latestScoredCP = 0;
     engine.onmessage = function(event) {
       const line = event.data;
 
@@ -140,16 +141,17 @@
         const parts = line.split(" ");
         if (line.includes("cp")) {
           const cpIndex = parts.indexOf("cp");
-          analysisResults[currentMoveIndex].cp = parseInt(parts[cpIndex + 1]);
+          latestScoredCP = parseInt(parts[cpIndex + 1]);
         } else if (line.includes("mate")) {
           const mateIndex = parts.indexOf("mate");
           const mateValue = parseInt(parts[mateIndex + 1]);
-          analysisResults[currentMoveIndex].cp = mateValue > 0 ? 10000 : -10000;
+          latestScoredCP = mateValue > 0 ? 10000 : -10000;
         }
       }
     
       // 2. Only move forward when Stockfish says it's done
       if (line.startsWith("bestmove")) {
+		    analysisResults[currentMoveIndex].cp = latestScoredCP;
         // Sync the pcp for the next move
         if (currentMoveIndex + 1 < analysisResults.length) {
           analysisResults[currentMoveIndex + 1].pcp = analysisResults[currentMoveIndex].cp;
