@@ -91,6 +91,9 @@
 		let analysisResults = []; // This will store the JSON for the AI
 		let analysisPositions = [];
 		let gameHeaders = {};
+		let latestScoredCP = 0;
+		let gotScoreForMove = false;
+		let retryCount = 0;
 
 		function analizegame() {
 			// Reset engine state
@@ -121,9 +124,6 @@
 			analyzeNextPosition();
 		}
 
-		let gotScoreForMove = false;
-		let retryCount = 0;
-
 		function analyzeNextPosition() {
 			if (currentMoveIndex >= analysisPositions.length) {
 				callGemini(analysisResults);
@@ -133,13 +133,12 @@
 			const fen = analysisPositions[currentMoveIndex];
 			const depth = depth_slider.value;
 			gotScoreForMove = false;
-			latestScoredCP = 0;
-
+			
 			document.getElementById('ai-review').innerHTML = `Analyzing move ${currentMoveIndex + 1}...`;
 
 			engine.postMessage(`position fen ${fen}`);
 			if (retryCount > 0) {
-				engine.postMessage(`go movetime 350`);
+				engine.postMessage(`go movetime 500`);
 			} else {
 				engine.postMessage(`go depth ${depth}`);
 			}
@@ -151,26 +150,33 @@
 
 		// recieves messages from stockfish
 		engine.postMessage('uci');
-		let latestScoredCP = 0;
 
 		engine.onmessage = function (event) {
 			const line = event.data;
 
+			// DEBUG: Next line can be uncommented for debug purposes, to see each engine thought.
+			console.log("SF:", line);
+			
 			if (line === "uciok") {
 				engineReady = true;
-				console.log("Engine Ready");
+				console.log("Engine is Ready");
 			}
 
 			// 1. Capture the latest evaluation
 			if (line.includes("info") && line.includes("score")) {
 				const parts = line.split(" ");
+				let score = null;
 				if (line.includes("cp")) {
 					latestScoredCP = parseInt(parts[parts.indexOf("cp") + 1]);
 					gotScoreForMove = true;
 				} else if (line.includes("mate")) {
 					const mateIndex = parts.indexOf("mate");
 					const mateValue = parseInt(parts[mateIndex + 1]);
-					latestScoredCP = mateValue > 0 ? 10000 : -10000;
+					score = mateValue > 0 ? 10000 : -10000;
+				}
+				if (score !== null) {
+					latestScoredCP = score;
+					gotScoreForMove = true;
 				}
 			}
 
@@ -182,18 +188,14 @@
 					analyzeNextPosition(); // Run the same index again
 					return; // Stop here and wait for the retry
 				}
-				// If there's still ni score after retry, inherit from previous move
-				if (!gotScoreForMove && currentMoveIndex > 0) {
-					latestScoredCP = analysisResults[currentMoveIndex - 1].cp;
-				}
 
-				console.log(`Move ${currentMoveIndex + 1} complete. Final CP: ${latestScoredCP}`);
 				analysisResults[currentMoveIndex].cp = latestScoredCP;
 				// Sync the pcp for the next move
 				if (currentMoveIndex + 1 < analysisResults.length) {
 					analysisResults[currentMoveIndex + 1].pcp = latestScoredCP;
 				}
 
+				console.log(`Move ${analysisResults[currentMoveIndex].m} Result: CP=${latestScoredCP}`);
 				currentMoveIndex++;
 				if (currentMoveIndex < analysisPositions.length) {
 					retryCount = 0;
@@ -214,7 +216,7 @@
 				alert("Invalid PGN!")
 			} else {
 				if (!engineReady === true) {
-					alert("Error with stockfish!")
+					alert("Error with stockfish. Please wait - it may still be loading.")
 				} else {
 					analizegame();
 				}
