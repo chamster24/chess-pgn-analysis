@@ -9,15 +9,13 @@
     <h1>AI Chess PGN Analyzer</h1>
   </header>
 
-  <main style="flex-grow: 1; display: flex; overflow: hidden;">
+  <main style="display: flex; height: calc(100vh - 80px); overflow: hidden;">
 
-    <div id="board-area" style="flex: 6; background: #eee; display: flex; justify-content: center; align-items: center; padding: 20px;">
-      <div id="board" style="width: 100%; max-width: 600px; aspect-ratio: 1/1; background: #ccc; border: 2px solid #999;"></div>
+    <div id="board-area" style="flex: 6; background: #eee; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px; min-height: 0">
+      <div id="board" style="width: 100%; max-width: 450px;"></div>
     </div>
-
-
     
-    <div id="analysis-area" style="flex: 4; display: flex; flex-direction: column; padding: 20px; border-left: 1px solid #ccc; background: white; max-height: 100vh; overflow: hidden;">
+    <div id="analysis-area" style="flex: 4; display: flex; flex-direction: column; padding: 20px; border-left: 1px solid #ccc; background: white; height: 100%; box-sizing: border-box;">
 
 		  <div id="results" style="display: flex; flex-direction: column; flex-grow: 1;">
         <div id="ai-review" style="height: 30%; min-height: 100px; padding: 15px; background: #f9f9f9; border-bottom: 2px solid #eee; overflow-y: auto;">
@@ -73,8 +71,11 @@
     const depth_slider = document.getElementById('depth-slider');
     const depthLabel = document.getElementById('depth-value');
 	  const analyze_btn = document.getElementById('analyze-btn');
-    const board = ChessBoard('board', 'start');
-
+	  const board = ChessBoard('board', {
+      position: 'start',
+      pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+    });
+    
     let engineReady = false;
     let currentMoveIndex = 0;
     let analysisResults = []; // This will store the JSON for the AI
@@ -82,23 +83,31 @@
     let gameHeaders = {};
 
     function analizegame() {
+      // Reset engine state
+      currentMoveIndex = 0;
       const history = game.history({ verbose: true });
-      const headers = game.header();
-      gameHeaders = game.header();
-
+    
+      // Create the empty slots for scores
       analysisResults = history.map((move, index) => {
         const moveNum = Math.floor(index / 2) + 1;
         const side = move.color === 'w' ? 'w' : 'b';
+        // Look for [%clk 0:00:00] in the move comments
+        let timestamp = "";
+        if (move.comments) {
+          const clkMatch = move.comments.join(" ").match(/\[%clk\s+([\d:]+)\]/);
+          timestamp = clkMatch ? clkMatch[1] : "";
+        }
         return {
-          m: `${moveNum}${side}`, 
+          m: `${moveNum}${side}`,
           san: move.san,
-          cp: 0,
-          pcp: 0,
-          c: move.comment || ""
+          cp: 0,   // This will be filled by engine
+          pcp: 0,  // This will be filled by engine
+          t: timestamp,
+          c: ""    // This will be filled by AI
         };
       });
+    
       analysisPositions = history.map(m => m.after);
-      currentMoveIndex = 0;
       analyzeNextPosition();
     }
 
