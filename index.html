@@ -115,6 +115,8 @@
 			const fen = analysisPositions[currentMoveIndex];
 			const depth = depth_slider.value;
 
+			latestScoredCP = 0;
+
 			document.getElementById('ai-review').innerHTML = `Analyzing move ${currentMoveIndex + 1}...`;
 
 			engine.postMessage(`position fen ${fen}`);
