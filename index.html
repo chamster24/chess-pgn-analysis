@@ -165,28 +165,26 @@
 			// 1. Capture the latest evaluation
 			if (line.includes("info") && line.includes("score")) {
 				const parts = line.split(" ");
-				let score = null;
+				
 				if (line.includes("cp")) {
-					latestScoredCP = parseInt(parts[parts.indexOf("cp") + 1]);
+					latestScoredCP = parseInt(parts[cpIndex + 1]);
 					gotScoreForMove = true;
+					console.log("Caught CP:", latestScoredCP);
 				} else if (line.includes("mate")) {
 					const mateIndex = parts.indexOf("mate");
 					const mateValue = parseInt(parts[mateIndex + 1]);
 					score = mateValue > 0 ? 10000 : -10000;
-				}
-				if (score !== null) {
-					latestScoredCP = score;
 					gotScoreForMove = true;
 				}
 			}
 
 			// 2. Only move forward when Stockfish says it's done
 			if (line.startsWith("bestmove")) {
-				if (!gotScoreForMove && retryCount < 1) {
-					console.log(`Move ${currentMoveIndex + 1} had no score. Retrying with movetime...`);
+				if (gotScoreForMove === false && retryCount < 1) {
+					console.log(`No score line caught. Retrying...`);
 					retryCount++;
 					analyzeNextPosition(); // Run the same index again
-					return; // Stop here and wait for the retry
+					return;
 				}
 
 				analysisResults[currentMoveIndex].cp = latestScoredCP;
@@ -195,10 +193,11 @@
 					analysisResults[currentMoveIndex + 1].pcp = latestScoredCP;
 				}
 
-				console.log(`Move ${analysisResults[currentMoveIndex].m} Result: CP=${latestScoredCP}`);
+				console.log(`Move ${analysisResults[currentMoveIndex].m}'s CP=${latestScoredCP}`);
 				currentMoveIndex++;
 				if (currentMoveIndex < analysisPositions.length) {
 					retryCount = 0;
+					gotScoreForMove = false;
 					analyzeNextPosition();
 				} else {
 					document.getElementById('ai-review').innerHTML = "<b>Stockfish Complete!</b> Sending to Gemini for Analysis...";
