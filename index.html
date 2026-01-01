@@ -136,9 +136,10 @@
 			
 			document.getElementById('ai-review').innerHTML = `Analyzing move ${currentMoveIndex + 1}...`;
 
+			engine.postMessage(`stop`);
 			engine.postMessage(`position fen ${fen}`);
 			if (retryCount > 0) {
-				engine.postMessage(`go movetime 500`);
+				engine.postMessage(`go movetime 600`);
 			} else {
 				engine.postMessage(`go depth ${depth}`);
 			}
@@ -165,8 +166,8 @@
 			// 1. Capture the latest evaluation
 			if (line.includes("info") && line.includes("score")) {
 				const parts = line.split(" ");
-				
 				if (line.includes("cp")) {
+					const cpIndex = parts.indexOf("cp");
 					latestScoredCP = parseInt(parts[cpIndex + 1]);
 					gotScoreForMove = true;
 					console.log("Caught CP:", latestScoredCP);
@@ -193,7 +194,7 @@
 					analysisResults[currentMoveIndex + 1].pcp = latestScoredCP;
 				}
 
-				console.log(`Move ${analysisResults[currentMoveIndex].m}'s CP=${latestScoredCP}`);
+				console.log(`Move ${analysisResults[currentMoveIndex].m}: ${latestScoredCP}`);
 				currentMoveIndex++;
 				if (currentMoveIndex < analysisPositions.length) {
 					retryCount = 0;
