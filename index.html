@@ -5,27 +5,22 @@
 	<title>AI Chess PGN Analyzer</title>
 </head>
 
-<body
-	style="margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; font-family: sans-serif;">
+<body style="margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; font-family: sans-serif;">
 
-	<header
-		style="height: 50px; background: #333; color: white; display: flex; align-items: center; padding: 0 20px; flex-shrink: 0;">
+	<header style="height: 50px; background: #333; color: white; display: flex; align-items: center; padding: 0 20px; flex-shrink: 0;">
 		<h1>AI Chess PGN Analyzer</h1>
 	</header>
 
 	<main style="display: flex; height: calc(100vh - 80px); overflow: hidden;">
 
-		<div id="board-area"
-			style="flex: 6; background: #eee; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px; min-height: 0">
+		<div id="board-area" style="flex: 6; background: #eee; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px; min-height: 0">
 			<div id="board" style="width: 100%; max-width: 450px;"></div>
 		</div>
 
-		<div id="analysis-area"
-			style="flex: 4; display: flex; flex-direction: column; padding: 20px; border-left: 1px solid #ccc; background: white; height: 100%; box-sizing: border-box;">
+		<div id="analysis-area" style="flex: 4; display: flex; flex-direction: column; padding: 20px; border-left: 1px solid #ccc; background: white; height: 100%; box-sizing: border-box;">
 
 			<div id="results" style="display: flex; flex-direction: column; flex-grow: 1;">
-				<div id="ai-review"
-					style="height: 30%; min-height: 100px; padding: 15px; background: #f9f9f9; border-bottom: 2px solid #eee; overflow-y: auto;">
+				<div id="ai-review" style="height: 30%; min-height: 100px; padding: 15px; background: #f9f9f9; border-bottom: 2px solid #eee; overflow-y: auto;">
 					<p style="color: #888;">AI analysis for each move will appear here...</p>
 				</div>
 
@@ -35,8 +30,7 @@
 			</div>
 
 			<div id="controls">
-				<textarea id="pgn-input" placeholder="Paste PGN here..."
-					style="width: 100%; height: 15%; padding: 10px; resize: none; flex-shrink: 0;"></textarea>
+				<textarea id="pgn-input" placeholder="Paste PGN here..." style="width: 100%; height: 15%; padding: 10px; resize: none; flex-shrink: 0;"></textarea>
 
 				<div style="display: flex; align-items: center; gap: 15px;">
 					<div style="margin-bottom: 15px; flex-grow: 1;">
@@ -44,8 +38,7 @@
 							Depth: <span id="depth-value" style="color: #4CAF50;">12</span>
 						</label>
 
-						<input type="range" id="depth-slider" min="5" max="20" value="12"
-							style="width: 100%; cursor: pointer; accent-color: #4CAF50;">
+						<input type="range" id="depth-slider" min="5" max="20" value="12" style="width: 100%; cursor: pointer; accent-color: #4CAF50;">
 
 						<div style="display: flex; justify-content: space-between; font-size: 10px; color: #888;">
 							<span>5 (Fast)</span>
@@ -53,8 +46,7 @@
 						</div>
 					</div>
 
-					<button id="analyze-btn"
-						style="width: 20%; margin: 15px 0; padding: 12px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; flex-shrink: 0;">
+					<button id="analyze-btn" style="width: 20%; margin: 15px 0; padding: 12px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; flex-shrink: 0;">
 						ANALYZE GAME
 					</button>
 				</div>
@@ -64,8 +56,7 @@
 	</main>
 
 
-	<footer
-		style="height: 30px; background: #444; color: white; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+	<footer style="height: 30px; background: #444; color: white; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
 		<p style="text-align: center;">&copy; 2025 cHamster24. All rights reserved. | <a
 				href="https://github.com/chamster24/chess-pgn-analysis/">Github</a></p>
 	</footer>
@@ -122,7 +113,7 @@
 
 			analysisPositions = history.map(m => m.after);
 			engine.postMessage("ucinewgame");
-    	engine.postMessage("isready");
+		engine.postMessage("isready");
 			analyzeNextPosition();
 		}
 
@@ -154,10 +145,9 @@
 		// recieves messages from stockfish
 		engine.postMessage('uci');
 
-		engine.onmessage = function (event) {
+engine.onmessage = function (event) {
 			const line = event.data;
 
-			// DEBUG: Next line can be uncommented for debug purposes, to see each engine thought.
 			console.log("SF:", line);
 
 			if (line === "uciok") {
@@ -171,50 +161,47 @@
 				if (analysisPositions[currentMoveIndex] && line.includes("cp")) {
 					const cpIndex = parts.indexOf("cp");
 					latestScoredCP = parseInt(parts[cpIndex + 1]);
-					// Flip score if it's Black's turn
 					const currentFen = analysisPositions[currentMoveIndex];
 					if (currentFen.includes(" b ")) {
 						latestScoredCP = -latestScoredCP;
 					}
 					gotScoreForMove = true;
 					console.log("Caught CP:", latestScoredCP);
+				} else if (line.includes("mate")) {
+					const parts = line.split(" "); // Re-declaring parts for the mate line
+					const mateIndex = parts.indexOf("mate");
+					const mateValue = parseInt(parts[mateIndex + 1]);
+					latestScoredCP = mateValue > 0 ? 10000 : -10000;
+					gotScoreForMove = true;
 				}
-				gotScoreForMove = true;
-				console.log("Caught CP:", latestScoredCP);
-			} else if (line.includes("mate")) {
-				const mateIndex = parts.indexOf("mate");
-				const mateValue = parseInt(parts[mateIndex + 1]);
-				latestScoredCP = mateValue > 0 ? 10000 : -10000;
-				gotScoreForMove = true;
 			}
-		}
+		
+			// 2. Only move forward when Stockfish says it's done
+			if (line.startsWith("bestmove")) {
+				if (gotScoreForMove === false && retryCount < 1) {
+					console.log(`No score line caught. Retrying...`);
+					retryCount++;
+					analyzeNextPosition(); 
+					return;
+				}
 
-		// 2. Only move forward when Stockfish says it's done
-		if (line.startsWith("bestmove")) {
-			if (gotScoreForMove === false && retryCount < 1) {
-				console.log(`No score line caught. Retrying...`);
-				retryCount++;
-				analyzeNextPosition(); // Run the same index again
-				return;
-			}
+				analysisResults[currentMoveIndex].cp = latestScoredCP;
+				if (currentMoveIndex + 1 < analysisResults.length) {
+					analysisResults[currentMoveIndex + 1].pcp = latestScoredCP;
+				}
 
-			analysisResults[currentMoveIndex].cp = latestScoredCP;
-			// Sync the pcp for the next move
-			if (currentMoveIndex + 1 < analysisResults.length) {
-				analysisResults[currentMoveIndex + 1].pcp = latestScoredCP;
+				console.log(`Move ${analysisResults[currentMoveIndex].m}: ${latestScoredCP}`);
+				currentMoveIndex++;
+				if (currentMoveIndex < analysisPositions.length) {
+					retryCount = 0;
+					gotScoreForMove = false;
+					analyzeNextPosition();
+				} else {
+					document.getElementById('ai-review').innerHTML = "<b>Stockfish Complete!</b> Sending to Gemini for Analysis...";
+					callGemini(analysisResults);
+				}
 			}
-
-			console.log(`Move ${analysisResults[currentMoveIndex].m}: ${latestScoredCP}`);
-			currentMoveIndex++;
-			if (currentMoveIndex < analysisPositions.length) {
-				retryCount = 0;
-				gotScoreForMove = false;
-				analyzeNextPosition();
-			} else {
-				document.getElementById('ai-review').innerHTML = "<b>Stockfish Complete!</b> Sending to Gemini for Analysis...";
-				callGemini(analysisResults);
-			}
-		}
+		}; 
 
 		// Check for valid PGN on button click, before running a game check
 		analyze_btn.addEventListener('click', function () {
