@@ -44,8 +44,8 @@ class handler(BaseHTTPRequestHandler):
             "Use only the digit, no quotes. "
             "In 'AICOMM', occasionally refer to the user as 'you', and occasionally "
             f"refer to them as '{user_color}' to keep the analysis feeling professional yet personal. "
-            "The BM field is for the best recommended move by stockfish for that side. If the user's move 
-            was significantly worse than the best move ('bm'), explain WHY 'bm' was better, and why the user's move was bad. "
+            "The BM field is for the best recommended move by stockfish for that side. If the user's move "
+            "was significantly worse than the best move ('bm'), explain WHY 'bm' was better, and why the user's move was bad. "
             f"Data: {json.dumps(game_data)}"
         )
         
@@ -70,7 +70,11 @@ class handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(ai_text.strip().encode('utf-8'))
         except Exception as e:
+            self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
             self.send_response(500)
             self.send_header('Access-Control-Allow-Origin', 'https://chamster24.github.io')
+            self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+            
+            error_message = {"error": str(e), "details": "Check if GEMINI_API_KEY is set and model name is correct."}
+            self.wfile.write(json.dumps(error_message).encode('utf-8'))
