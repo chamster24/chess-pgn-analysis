@@ -30,17 +30,17 @@
 			</div>
 
 			<div id="controls">
-				<textarea id="pgn-input" placeholder="Paste PGN here..." style="width: 100%; height: 80px; padding: 10px; resize: none; box-sizing: border-box;"></textarea>
-    			<div style="display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-top: 10px;">
-        			<div style="flex: 2;">
+				<textarea id="pgn-input" placeholder="Paste PGN here..." style="width: 100%; height: 50px; padding: 8px; resize: none; box-sizing: border-box;"></textarea>
+    			<div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px;">
+        			<div style="flex: 3;">
             			<label style="font-size: 11px; font-weight: bold; display: block;">DEPTH: <span id="depth-value">8</span></label>
-            			<input type="range" id="depth-slider" min="5" max="20" value="8" style="width: 100%; accent-color: #4CAF50;">
+            			<input type="range" id="depth-slider" min="1" max="20" value="8" style="width: 100%; accent-color: #4CAF50;">
         			</div>
-        			<div style="text-align: center; flex: 1;">
+        			<div style="text-align: center; flex: 0.8;">
             		<div id="color-btn" style="width: 35px; height: 35px; border-radius: 50%; border: 3px solid #4CAF50; margin: 0 auto; cursor: pointer; background: white;"></div>
             			<span id="color-name" style="font-size: 9px; font-weight: bold; text-align: center;">I'm White</span>
         			</div>
-        			<button id="analyze-btn" style="flex: 2; padding: 12px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">
+        			<button id="analyze-btn" style="flex: 1.4; padding: 10px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">
             			ANALYZE GAME
         			</button>
 				</div>
@@ -100,7 +100,6 @@
 			// Reset engine state
 			currentMoveIndex = 0;
 			const history = game.history({ verbose: true });
-			
 			const tempGame = new Chess(); 
     		analysisPositions = [];
 
@@ -117,13 +116,25 @@
 					const clkMatch = move.comments.join(" ").match(/\[%clk\s+([\d:]+)\]/);
 					timestamp = clkMatch ? clkMatch[1] : "";
 				}
+
+				let originalComments = "";
+				if (move.comments) {
+					originalComments = move.comments
+						.join(" ")
+						.replace(/\[%clk\s+[\d:]+\]/g, "") // Strip the clock tag
+						.trim();
+				}
 				return {
 					m: `${moveNum}${side}`,
 					san: move.san,
 					cp: 0,   // This will be filled by engine
 					pcp: 0,  // This will be filled by engine
 					t: timestamp,
-					c: ""    // This will be filled by AI
+					c: {
+						AIRATE: "", // This will be filled by ai
+						AICOMM: "", // This will be filled by ai
+						COMM: originalComments, // This will be filled by engine
+					}
 				};
 			});
 
@@ -144,7 +155,7 @@
 			gotScoreForMove = false;
 			
 			// DEBUG - uncomment next line
-			console.log("Analyzing FEN:", fen);
+			// console.log("Analyzing FEN:", fen);
 			
 			document.getElementById('ai-review').innerHTML = `Analyzing move ${currentMoveIndex + 1}...`;
 
@@ -239,17 +250,21 @@
 		});
 
 		async function callGemini(fullGameData) {
-			console.table(fullGameData); // debug 
 			document.getElementById('ai-review').innerHTML = "AI is thinking...";
 
 			try {
 				const vercelUrl = 'https://chess-pgn-analysis.vercel.app/api';
 
+				const payload = {
+					playerColor: userColor,
+					gameData: fullGameData
+				}
+
 				// 2. Send the chess data to the Python function
 				const response = await fetch(vercelUrl, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(fullGameData)
+					body: JSON.stringify(payload)
 				});
 
 				const result = await response.json();
