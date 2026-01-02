@@ -171,12 +171,16 @@
 				if (line.includes("cp")) {
 					const cpIndex = parts.indexOf("cp");
 					latestScoredCP = parseInt(parts[cpIndex + 1]);
+					const currentFen = analysisPositions[currentMoveIndex];
+            		if (currentFen.includes(" b ")) {
+                		latestScoredCP = -latestScoredCP;
+					}
 					gotScoreForMove = true;
 					console.log("Caught CP:", latestScoredCP);
 				} else if (line.includes("mate")) {
 					const mateIndex = parts.indexOf("mate");
 					const mateValue = parseInt(parts[mateIndex + 1]);
-					score = mateValue > 0 ? 10000 : -10000;
+					latestScoredCP = mateValue > 0 ? 10000 : -10000;
 					gotScoreForMove = true;
 				}
 			}
