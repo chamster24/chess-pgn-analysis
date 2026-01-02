@@ -229,11 +229,6 @@
 			    if (currentMoveIndex + 1 < analysisResults.length) {
 			        analysisResults[currentMoveIndex + 1].pcp = latestScoredCP;
 			    }
-							
-				analysisResults[currentMoveIndex].cp = latestScoredCP;
-				if (currentMoveIndex + 1 < analysisResults.length) {
-					analysisResults[currentMoveIndex + 1].pcp = latestScoredCP;
-				}
 
 				console.log(`Move ${analysisResults[currentMoveIndex].m}: ${latestScoredCP}`);
 				currentMoveIndex++;
