@@ -137,6 +137,8 @@
 			document.getElementById('ai-review').innerHTML = `Analyzing move ${currentMoveIndex + 1}...`;
 
 			engine.postMessage(`stop`);
+			engine.postMessage("ucinewgame"); 
+    		engine.postMessage("isready");
 			engine.postMessage(`position fen ${fen}`);
 			if (retryCount > 0) {
 				engine.postMessage(`go movetime 600`);
