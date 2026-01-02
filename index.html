@@ -87,6 +87,16 @@
 		let gotScoreForMove = false;
 		let retryCount = 0;
 
+		const ratingMap = {
+			1: { ico: "!!", txt: "Brilliant", col: "#22c9a8" },
+			2: { ico: "⭐", txt: "Best", col: "#57ad42" },
+			3: { ico: "👍", txt: "Excellent", col: "#63ad4b" },
+			4: { ico: "✅", txt: "Good", col: "#7ec961" },
+			5: { ico: "?!", txt: "Inaccuracy", col: "#ebc634" },
+			6: { ico: "?", txt: "Mistake", col: "#eb7a34" },
+			7: { ico: "??", txt: "Blunder", col: "#e0201d" }
+		};
+
 		// Color Picker Button Code
 		let userColor = "w";
 		color_btn.onclick = function() {
@@ -101,6 +111,77 @@
 			}
 			console.log("User changed color to:", userColor)
 		}
+
+		function jumpTo(index) {
+		    if (analysisResults.length === 0) return;
+		    
+		    // Ensure index is within 0 and the last move
+		    currentMoveIndex = Math.max(0, Math.min(index, analysisResults.length - 1));
+		    updateMoveView();
+		}
+		
+		function step(delta) {
+		    if (analysisResults.length === 0) return;
+		    
+		    let newIndex = currentMoveIndex + delta;
+		    jumpTo(newIndex);
+		}
+		function updateMoveView() {
+		    if (!analysisResults || analysisResults.length === 0) return;
+		
+		    const move = analysisResults[currentMoveIndex];
+		    const r = ratingMap[move.c.AIRATE] || { txt: "Analysis", col: "#666", ico: "" };
+		
+		    // Update Board
+		    board.position(analysisPositions[currentMoveIndex]);
+		
+		    // Logic: Only show Engine Suggestion if the move was NOT the best or brilliant (AIRATE 1 or 2)
+		    const isNotBest = move.c.AIRATE > 2;
+		
+		    const reviewBox = document.getElementById('ai-review');
+		    reviewBox.innerHTML = `
+		        <div style="border-left: 6px solid ${r.col}; padding: 15px; background: white; border-radius: 0 8px 8px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+		            <h3 style="margin: 0 0 8px 0; font-size: 1.1rem; color: #333;">
+		                ${move.san} is <span style="color: ${r.col};">${r.ico} ${r.txt}</span>
+		            </h3>
+		            <p style="margin: 0; color: #444; line-height: 1.5; font-size: 0.95rem;">
+		                ${move.c.AICOMM}
+		            </p>
+		            ${(isNotBest && move.bm) ? `
+		                <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #eee; font-size: 0.85rem; color: #777;">
+		                    Engine Suggestion: <span style="color: #57ad42; font-weight: bold;">${move.bm}</span>
+		                </div>
+		            ` : ""}
+		        </div>
+		    `;
+		    // Refresh move list to update the "active" move highlighting
+		    generateMoveList();
+		}
+
+		function generateMoveList() {
+		    const pgnContainer = document.getElementById('pgn');
+		    let html = '<div style="display: flex; flex-wrap: wrap; gap: 10px; padding: 5px;">';
+		
+		    analysisResults.forEach((move, index) => {
+		        const r = ratingMap[move.c.AIRATE] || { ico: "", col: "transparent" };
+		        const isWhite = move.m.includes('w');
+		        
+		        if (isWhite) {
+		            html += `<span style="color: #888; font-weight: bold; margin-right: 2px;">${Math.floor(index/2) + 1}.</span>`;
+		        }
+		
+		        // Create a "hyperlink" using a span with a click event
+		        html += `
+		            <span onclick="jumpTo(${index})" style="cursor: pointer; font-weight: ${currentMoveIndex === index ? 'bold' : 'normal'}; color: ${currentMoveIndex === index ? '#4CAF50' : '#333'}; padding: 2px 4px; border-radius: 3px; background: ${currentMoveIndex === index ? '#e8f5e9' : 'transparent'};">
+		                ${move.san}<span style="color: ${r.col}; font-size: 0.8rem; margin-left: 2px; vertical-align: super;">${r.ico}</span>
+		            </span>
+		        `;
+		    });
+		
+		    html += '</div>';
+		    pgnContainer.innerHTML = html;
+		}
+
 		
 		function analizegame() {
 			// Reset engine state
@@ -284,15 +365,10 @@
 					document.getElementById('ai-review').innerHTML = `<b>Backend Error:</b> ${result.error}`;
 					return;
 				}
-				analysisResults = result;
+				analysisResults = result; // Save the AI-enhanced data
+				currentMoveIndex = 0;     // Reset to move 1
+				updateMoveView();         // Update the review box
 				// 4. Get the text from the Gemini response format
-				
-				if (analysisResults.length > 0 && analysisResults[0].c) {
-		            const firstComment = analysisResults[0].c.AICOMM || "No comment for this move.";
-		            document.getElementById('ai-review').innerHTML = `<b>Analysis Received!</b><br>First Move AI Note: ${firstComment}`;
-		        } else {
-		            document.getElementById('ai-review').innerHTML = "Analysis complete, but no comments were generated.";
-		        }
 
         console.log("Success! Full Data:", analysisResults);
 			} catch (error) {
