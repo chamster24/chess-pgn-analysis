@@ -132,7 +132,7 @@
 			engine.postMessage(`stop`);
 			engine.postMessage(`position fen ${fen}`);
 			if (retryCount > 0) {
-				engine.postMessage(`go movetime 600`);
+				engine.postMessage(`go depth ${depth} movetime 1000`);
 			} else {
 				engine.postMessage(`go depth ${depth}`);
 			}
