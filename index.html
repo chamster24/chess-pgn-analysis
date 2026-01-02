@@ -27,6 +27,12 @@
 				<div id="pgn" style="flex-grow: 1; overflow-y: auto; border-top: 1px solid #eee; padding-top: 10px;">
 					<p style="color: #888;">Moves will appear here...</p>
 				</div>
+				<div id="nav-controls" style="display: flex; gap: 5px; margin-bottom: 10px;">
+				    <button onclick="jumpTo(0)" style="flex: 1; padding: 5px; cursor: pointer;">|&lt;</button>
+				    <button onclick="step(-1)" style="flex: 1; padding: 5px; cursor: pointer;">&lt;</button>
+				    <button onclick="step(1)" style="flex: 1; padding: 5px; cursor: pointer;">&gt;</button>
+				    <button onclick="jumpTo(analysisResults.length - 1)" style="flex: 1; padding: 5px; cursor: pointer;">&gt;|</button>
+				</div>
 			</div>
 
 			<div id="controls">
@@ -130,6 +136,7 @@
 					cp: 0,   // This will be filled by engine
 					pcp: 0,  // This will be filled by engine
 					t: timestamp,
+					bm: "",
 					c: {
 						AIRATE: "", // This will be filled by ai
 						AICOMM: "", // This will be filled by ai
@@ -215,6 +222,14 @@
 					return;
 				}
 
+				const moveParts = line.split(" ");
+			    analysisResults[currentMoveIndex].bm = moveParts[1]; // Grabs "e2e4" from "bestmove e2e4"
+			
+			    analysisResults[currentMoveIndex].cp = latestScoredCP;
+			    if (currentMoveIndex + 1 < analysisResults.length) {
+			        analysisResults[currentMoveIndex + 1].pcp = latestScoredCP;
+			    }
+							
 				analysisResults[currentMoveIndex].cp = latestScoredCP;
 				if (currentMoveIndex + 1 < analysisResults.length) {
 					analysisResults[currentMoveIndex + 1].pcp = latestScoredCP;
@@ -274,18 +289,17 @@
 					document.getElementById('ai-review').innerHTML = `<b>Backend Error:</b> ${result.error}`;
 					return;
 				}
-
+				analysisResults = result;
 				// 4. Get the text from the Gemini response format
-				const aiText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+				
+				if (analysisResults.length > 0 && analysisResults[0].c) {
+		            const firstComment = analysisResults[0].c.AICOMM || "No comment for this move.";
+		            document.getElementById('ai-review').innerHTML = `<b>Analysis Received!</b><br>First Move AI Note: ${firstComment}`;
+		        } else {
+		            document.getElementById('ai-review').innerHTML = "Analysis complete, but no comments were generated.";
+		        }
 
-				if (aiText) {
-					// Show the analysis and fix line breaks
-					document.getElementById('ai-review').innerHTML =
-						`<div style="line-height:1.6;">${aiText.replace(/\n/g, '<br>')}</div>`;
-				} else {
-					document.getElementById('ai-review').innerHTML = "AI returned no text. Check Vercel logs.";
-				}
-
+        console.log("Success! Full Data:", analysisResults);
 			} catch (error) {
 				console.error("Connection Error:", error);
 				document.getElementById('ai-review').innerHTML = "Could not reach Python backend. Check console.";
