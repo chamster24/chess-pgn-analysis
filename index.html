@@ -55,7 +55,6 @@
 
 	</main>
 
-
 	<footer style="height: 30px; background: #444; color: white; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
 		<p style="text-align: center;">&copy; 2025 cHamster24. All rights reserved. | <a
 				href="https://github.com/chamster24/chess-pgn-analysis/">Github</a></p>
@@ -90,9 +89,15 @@
 			// Reset engine state
 			currentMoveIndex = 0;
 			const history = game.history({ verbose: true });
+			
+			const tempGame = new Chess(); 
+    		analysisPositions = [];
 
 			// Create the empty slots for scores
 			analysisResults = history.map((move, index) => {
+				tempGame.move(move); // Move the temp board forward
+        		analysisPositions.push(tempGame.fen()); // Store the FULL FEN string
+				
 				const moveNum = Math.floor(index / 2) + 1;
 				const side = move.color === 'w' ? 'w' : 'b';
 				// Look for [%clk 0:00:00] in the move comments
@@ -111,9 +116,9 @@
 				};
 			});
 
-			analysisPositions = history.map(m => m.after);
+			//analysisPositions = history.map(m => m.after); //commented for debug
 			engine.postMessage("ucinewgame");
-		engine.postMessage("isready");
+			engine.postMessage("isready");
 			analyzeNextPosition();
 		}
 
@@ -122,11 +127,14 @@
 				callGemini(analysisResults);
 				return;
 			}
-
+			
 			const fen = analysisPositions[currentMoveIndex];
 			const depth = depth_slider.value;
 			gotScoreForMove = false;
-
+			
+			// DEBUG - uncomment next line
+			console.log("Analyzing FEN:", fen);
+			
 			document.getElementById('ai-review').innerHTML = `Analyzing move ${currentMoveIndex + 1}...`;
 
 			engine.postMessage(`stop`);
@@ -145,9 +153,9 @@
 		// recieves messages from stockfish
 		engine.postMessage('uci');
 
-engine.onmessage = function (event) {
+		engine.onmessage = function (event) {
 			const line = event.data;
-
+			// DEBUG - uncomment next line
 			console.log("SF:", line);
 
 			if (line === "uciok") {
@@ -220,7 +228,7 @@ engine.onmessage = function (event) {
 		});
 
 		async function callGemini(fullGameData) {
-			console.table(fullGameData); //debug
+			console.table(fullGameData); // debug 
 			document.getElementById('ai-review').innerHTML = "AI is thinking...";
 
 			try {
