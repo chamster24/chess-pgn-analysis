@@ -30,25 +30,19 @@
 			</div>
 
 			<div id="controls">
-				<textarea id="pgn-input" placeholder="Paste PGN here..." style="width: 100%; height: 15%; padding: 10px; resize: none; flex-shrink: 0;"></textarea>
-
-				<div style="display: flex; align-items: center; gap: 15px;">
-					<div style="margin-bottom: 15px; flex-grow: 1;">
-						<label style="font-weight: bold; display: block; margin-bottom: 5px;">
-							Depth: <span id="depth-value" style="color: #4CAF50;">12</span>
-						</label>
-
-						<input type="range" id="depth-slider" min="1" max="20" value="8" style="width: 100%; cursor: pointer; accent-color: #4CAF50;">
-
-						<div style="display: flex; justify-content: space-between; font-size: 10px; color: #888;">
-							<span>5 (Fast)</span>
-							<span>20 (Deep)</span>
-						</div>
-					</div>
-
-					<button id="analyze-btn" style="width: 20%; margin: 15px 0; padding: 12px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; flex-shrink: 0;">
-						ANALYZE GAME
-					</button>
+				<textarea id="pgn-input" placeholder="Paste PGN here..." style="width: 100%; height: 80px; padding: 10px; resize: none; box-sizing: border-box;"></textarea>
+    			<div style="display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-top: 10px;">
+        			<div style="flex: 2;">
+            			<label style="font-size: 11px; font-weight: bold; display: block;">DEPTH: <span id="depth-value">8</span></label>
+            			<input type="range" id="depth-slider" min="5" max="20" value="8" style="width: 100%; accent-color: #4CAF50;">
+        			</div>
+        			<div style="text-align: center; flex: 1;">
+            		<div id="color-btn" style="width: 35px; height: 35px; border-radius: 50%; border: 3px solid #4CAF50; margin: 0 auto; cursor: pointer; background: white;"></div>
+            			<span id="color-name" style="font-size: 9px; font-weight: bold; text-align: center;">I'm White</span>
+        			</div>
+        			<button id="analyze-btn" style="flex: 2; padding: 12px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">
+            			ANALYZE GAME
+        			</button>
 				</div>
 			</div>
 		</div>
@@ -68,6 +62,8 @@
 		const game = new Chess();
 		const engine = new Worker('stockfish.js');
 
+		const color_btn = document.getElementById('color-btn');
+		const color_name = document.getElementById('color-name');
 		const depth_slider = document.getElementById('depth-slider');
 		const depthLabel = document.getElementById('depth-value');
 		const analyze_btn = document.getElementById('analyze-btn');
@@ -85,6 +81,21 @@
 		let gotScoreForMove = false;
 		let retryCount = 0;
 
+		// Color Picker Button Code
+		let userColor = "w";
+		color_btn.onclick = function() {
+			if (userColor === "w") {
+				userColor = "b";
+				color_btn.style.backgroundColor = 'black';
+				color_name.innerText = "I'm black";
+			} else {
+				userColor = "w";
+				color_btn.style.backgroundColor = 'white';
+				color_name.innerText = "I'm white";
+			}
+			console.log("User changed color to:", userColor)
+		}
+		
 		function analizegame() {
 			// Reset engine state
 			currentMoveIndex = 0;
