@@ -20,18 +20,19 @@
 		<div id="analysis-area" style="flex: 4; display: flex; flex-direction: column; padding: 20px; border-left: 1px solid #ccc; background: white; height: 100%; box-sizing: border-box;">
 
 			<div id="results" style="display: flex; flex-direction: column; flex-grow: 1;">
-				<div id="ai-review" style="height: 30%; min-height: 100px; padding: 15px; background: #f9f9f9; border-bottom: 2px solid #eee; overflow-y: auto;">
+				<div id="ai-review" style="height: 120px; flex-shrink: 0; padding: 15px; background: #f9f9f9; border-bottom: 2px solid #eee; overflow-y: auto;">
 					<p style="color: #888;">AI analysis for each move will appear here...</p>
 				</div>
 
-				<div id="pgn" style="flex-grow: 1; overflow-y: auto; border-top: 1px solid #eee; padding-top: 10px;">
+				<div id="pgn" style="flex-grow: 1; overflow-y: auto; padding: 10px;">
 					<p style="color: #888;">Moves will appear here...</p>
 				</div>
-				<div id="nav-controls" style="display: flex; gap: 5px; margin-bottom: 10px;">
-				    <button onclick="jumpTo(0)" style="flex: 1; padding: 5px; cursor: pointer;">|&lt;</button>
-				    <button onclick="step(-1)" style="flex: 1; padding: 5px; cursor: pointer;">&lt;</button>
-				    <button onclick="step(1)" style="flex: 1; padding: 5px; cursor: pointer;">&gt;</button>
-				    <button onclick="jumpTo(analysisResults.length - 1)" style="flex: 1; padding: 5px; cursor: pointer;">&gt;|</button>
+				<div id="nav-controls" style="flex-shrink: 0; display: flex; gap: 5px; padding: 10px; border-top: 1px solid #eee;">
+				    <button onclick="jumpTo(0)" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">|&lt;</button>
+				    <button onclick="step(-1)" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">&lt;</button>
+				    <button onclick="step(1)" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">&gt;</button>
+				    <button onclick="jumpTo(analysisResults.length - 1)" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">&gt;|</button>
+					<button onclick="sharePGN()" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">Share PGN</button> <!-- TODO -->
 				</div>
 			</div>
 
@@ -112,12 +113,21 @@
 			console.log("User changed color to:", userColor)
 		}
 
+		document.addEventListener('keydown', (e) => {
+		    if (e.key === "ArrowLeft") step(-1);
+		    if (e.key === "ArrowRight") step(1);
+		});
+		
 		function jumpTo(index) {
 		    if (analysisResults.length === 0) return;
-		    
 		    // Ensure index is within 0 and the last move
 		    currentMoveIndex = Math.max(0, Math.min(index, analysisResults.length - 1));
 		    updateMoveView();
+			// Auto-scroll the PGN list to the active move
+		    const activeElement = document.querySelector(`#pgn span[onclick="jumpTo(${index})"]`);
+		    if (activeElement) {
+		        activeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		    }
 		}
 		
 		function step(delta) {
@@ -158,6 +168,32 @@
 		    generateMoveList();
 		}
 
+		function sharePGN() {
+		    if (analysisResults.length === 0) {
+		        alert("No analysis to share yet!");
+		        return;
+		    }
+		
+		    let pgnString = "";
+		    analysisResults.forEach((move, index) => {
+		        const moveNum = Math.floor(index / 2) + 1;
+		        const isWhite = move.m.includes('w');
+		        const r = ratingMap[move.c.AIRATE] || { ico: "" };
+		
+		        if (isWhite) pgnString += `${moveNum}. `;
+		        
+		        // Add move, the icon (!!, ??), and the AI comment
+		        pgnString += `${move.san}${r.ico} {${move.c.AICOMM}} `;
+		    });
+		
+		    // Copy to clipboard
+		    navigator.clipboard.writeText(pgnString.trim()).then(() => {
+		        alert("Full analyzed PGN copied to clipboard!");
+		    }).catch(err => {
+		        console.error('Could not copy text: ', err);
+		    });
+		}
+		
 		function generateMoveList() {
 		    const pgnContainer = document.getElementById('pgn');
 		    let html = '<div style="display: flex; flex-wrap: wrap; gap: 10px; padding: 5px;">';
@@ -296,6 +332,7 @@
 		
 			// 2. Only move forward when Stockfish says it's done
 			if (line.startsWith("bestmove")) {
+				
 				if (gotScoreForMove === false && retryCount < 1) {
 					console.log(`No score line caught. Retrying...`);
 					retryCount++;
@@ -304,8 +341,12 @@
 				}
 
 				const moveParts = line.split(" ");
-			    analysisResults[currentMoveIndex].bm = moveParts[1]; // Grabs "e2e4" from "bestmove e2e4"
-			
+				const bestMoveFound = moveParts[1];
+
+			    if (currentMoveIndex + 1 < analysisResults.length) {
+			        analysisResults[currentMoveIndex + 1].bm = bestMoveFound;
+			    }
+				
 			    analysisResults[currentMoveIndex].cp = latestScoredCP;
 			    if (currentMoveIndex + 1 < analysisResults.length) {
 			        analysisResults[currentMoveIndex + 1].pcp = latestScoredCP;
