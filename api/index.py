@@ -82,7 +82,7 @@ class handler(BaseHTTPRequestHandler):
             response.raise_for_status()
 
             # Strips response to just text
-        	gemini_response = response.json()
+			gemini_response = response.json()
             ai_text = gemini_response['candidates'][0]['content']['parts'][0]['text']
             # Strips markdown
             if "```" in ai_text:
@@ -100,9 +100,9 @@ class handler(BaseHTTPRequestHandler):
             self.wfile.write(ai_text.strip().encode('utf-8'))
         except Exception as e:
 			self.send_response(500)
-            self.send_header('Access-Control-Allow-Origin', 'https://chamster24.github.io')
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            
-            error_message = {"error": str(e), "details": "Check if GEMINI_API_KEY is set and model name is correct."}
-            self.wfile.write(json.dumps(error_message).encode('utf-8'))
+			self.send_header('Access-Control-Allow-Origin', 'https://chamster24.github.io')
+			self.send_header('Content-type', 'application/json')
+			self.end_headers()
+			
+			error_message = {"error": str(e), "details": "Check if GEMINI_API_KEY is set and model name is correct."}
+			self.wfile.write(json.dumps(error_message).encode('utf-8'))
