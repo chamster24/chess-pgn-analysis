@@ -15,7 +15,7 @@ class handler(BaseHTTPRequestHandler):
     def do_POST(self):
         # 1. Grab your secret key from Vercel's environment
         api_key = os.environ.get("GEMINI_API_KEY")
-        
+		
         # 2. Read the chess data sent from your JS
         content_length = int(self.headers['Content-Length'])
         post_data = self.rfile.read(content_length)
