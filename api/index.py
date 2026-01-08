@@ -43,7 +43,7 @@ class handler(BaseHTTPRequestHandler):
 			AIRATE: 1 (Brilliant), 2 (Best), 3 (Good), 4 (OK), 5 (Inaccuracy), 6 (Mistake), 7 (Blunder). 
 			Use only the digit, no quotes. 
 			In 'AICOMM', occasionally refer to the user as 'you', and occasionally 
-			refer to them as '{user_color}' to keep the analysis feeling professional yet personal. 
+			refer to them as '{user_color}' to keep the analysis feeling professional yet personal. (unless they are a spectator, in which you will say white and black instead).
 			Do NOT explicitly state 'This is a mistake' or 'This is a blunder' at the end of your text, as the user will see the color-coded icon. Instead, focus on the 'Why'.
 			The BM field is for the best recommended move by stockfish for that side. If the user's move 
 			was significantly worse than the best move ('bm'), explain WHY 'bm' was better, and why the user's move was bad. 
