@@ -3,6 +3,14 @@
 
 <head>
 	<title>AI Chess PGN Analyzer</title>
+	<style>
+		/* Engine Best Move (Green) */
+		.marker-arrow-green { fill: rgba(76, 175, 80, 0.6) !important; stroke: rgba(76, 175, 80, 0.8) !important; }
+		/* AI Suggestion/Insight (Yellow) */
+		.marker-arrow-yellow { fill: rgba(255, 235, 59, 0.6) !important; stroke: rgba(255, 235, 59, 0.8) !important; }
+		/* Blunders (Red) */
+		.marker-arrow-red { fill: rgba(224, 32, 29, 0.6) !important; stroke: rgba(224, 32, 29, 0.8) !important; }
+	</style>
 </head>
 
 <body style="margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; font-family: sans-serif;">
@@ -63,10 +71,19 @@
 			<a href="https://github.com/chamster24/chess-pgn-analysis/blob/main/CREDITS.md" target="_blank" rel="noopener noreferrer">Credits</a></p>
 	</footer>
 
-	<link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
-	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-	<script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@5/assets/styles/cm-chessboard.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@5/assets/extensions/markers/markers.css">
+	<script type="module">
+		import {Chessboard} from "https://cdn.jsdelivr.net/npm/cm-chessboard@5/src/cm-chessboard/Chessboard.js";
+		import {Markers} from "https://cdn.jsdelivr.net/npm/cm-chessboard@5/src/cm-chessboard/extensions/markers/Markers.js";
+		window.Markers = Markers;
+		window.board = new Chessboard(document.getElementById("board"), {
+			position: "start",
+			assetsUrl: "https://cdn.jsdelivr.net/npm/cm-chessboard@5/assets/",
+			extensions: [{class: Markers}]
+		});
+	</script>
+	
 	<script>
 		const game = new Chess();
 		const engine = new Worker('stockfish.js');
@@ -76,9 +93,10 @@
 		const depth_slider = document.getElementById('depth-slider');
 		const depthLabel = document.getElementById('depth-value');
 		const analyze_btn = document.getElementById('analyze-btn');
-		const board = ChessBoard('board', {
-			position: 'start',
-			pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+		const board = new ChessBoard(document.getElementById("board"), {
+			position: "start",
+			assetsUrl: "https://cdn.jsdelivr.net/npm/cm-chessboard@5/assets/",
+			extensions: [{class: Markers}]
 		});
 
 		let engineReady = false;
@@ -123,6 +141,19 @@
 		    if (e.key === "ArrowLeft") step(-1);
 		    if (e.key === "ArrowRight") step(1);
 		});
+
+		function getLocalRating(move) {
+			const loss = move.m.includes('w') ? (move.pcp - move.cp) : (move.cp - move.pcp);
+			const isBest = move.san === move.bm;
+			// 1: Brilliant, 2: Best, 3: Excellent, 4: Good, 5: Inaccuracy, 6: Mistake, 7: Blunder
+			// NOTE: Brilliant moves will be left to the ai to decide.
+			if (isBest) return 2;
+			if (loss <= 20) return 3;
+			if (loss <= 50) return 4;
+			if (loss <= 100) return 5;
+			if (loss <= 300) return 6;
+			return 7;
+		}
 		
 		function jumpTo(index) {
 		    if (analysisResults.length === 0) return;
@@ -148,9 +179,13 @@
 		    const move = analysisResults[currentMoveIndex];
 		    const r = ratingMap[move.c.AIRATE] || { txt: "Analysis", col: "#666", ico: "" };
 		
-		    // Update Board
-		    board.position(analysisPositions[currentMoveIndex]);
-		
+			// Update Board 
+			board.setPosition(analysisPositions[currentMoveIndex]);
+			// Clear Arrows
+			board.removeMarkers();
+
+			// TODO - add board annotation
+			
 		    // Logic: Only show Engine Suggestion if the move was NOT the best or brilliant (AIRATE 1 or 2)
 		    const isNotBest = move.c.AIRATE > 2;
 		
@@ -231,6 +266,7 @@
 			const history = game.history({ verbose: true });
 			const tempGame = new Chess(); 
     		analysisPositions = [];
+			gameHeaders = game.header();
 
 			// Create the empty slots for scores
 			analysisResults = history.map((move, index) => {
@@ -308,7 +344,7 @@
 		engine.onmessage = function (event) {
 			const line = event.data;
 			// DEBUG - uncomment next line
-			console.log("SF:", line);
+			// console.log("SF:", line);
 
 			if (line === "uciok") {
 				engineReady = true;
@@ -326,7 +362,7 @@
 						latestScoredCP = -latestScoredCP;
 					}
 					gotScoreForMove = true;
-					console.log("Caught CP:", latestScoredCP);
+					// console.log("Caught CP:", latestScoredCP);
 				} else if (line.includes("mate")) {
 					const parts = line.split(" "); // Re-declaring parts for the mate line
 					const mateIndex = parts.indexOf("mate");
@@ -354,6 +390,7 @@
 			    }
 				
 			    analysisResults[currentMoveIndex].cp = latestScoredCP;
+				analysisResults[currentMoveIndex].c.AIRATE = getLocalRating(analysisResults[currentMoveIndex]);
 			    if (currentMoveIndex + 1 < analysisResults.length) {
 			        analysisResults[currentMoveIndex + 1].pcp = latestScoredCP;
 			    }
@@ -395,7 +432,8 @@
 
 				const payload = {
 					playerColor: userColor,
-					gameData: fullGameData
+					gameData: fullGameData,
+					headers: gameHeaders
 				}
 
 				// 2. Send the chess data to the Python function
