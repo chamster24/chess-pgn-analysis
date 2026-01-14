@@ -292,6 +292,7 @@
 				return {
 					m: `${moveNum}${side}`,
 					san: move.san,
+					uci: move.from + move.to,
 					cp: 0,   // This will be filled by engine
 					pcp: 0,  // This will be filled by engine
 					t: timestamp,
