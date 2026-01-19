@@ -25,7 +25,7 @@
 			<div id="eval-bar-container" style="width: 25px; height: 400px; background: #333; border: 2px solid #555; display: flex; flex-direction: column; position: relative; border-radius: 4px; overflow: hidden; flex-shrink: 0;">
 				<div id="eval-bar-white" style="width: 100%; height: 50%; background: white; transition: height 0.3s ease-out;"></div>
 				<div id="eval-val-text" style="position: absolute; bottom: 5px; width: 100%; text-align: center; font-size: 10px; font-weight: bold; color: #4CAF50; background: rgba(255,255,255,0.8); z-index: 10;">0.0</div>
-			<div id="board" style="width: 100%; max-width: 450px;"></div>
+			</div><div id="board" style="width: 100%; max-width: 450px;"></div>
 		</div>
 
 		<div id="analysis-area" style="flex: 4; display: flex; flex-direction: column; padding: 20px; border-left: 1px solid #ccc; background: white; height: 100%; box-sizing: border-box;">
@@ -43,8 +43,8 @@
 				    <button onclick="step(-1)" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">&lt;</button>
 				    <button onclick="step(1)" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">&gt;</button>
 				    <button onclick="jumpTo(analysisResults.length - 1)" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">&gt;|</button>
-					<!-- TODO --> <button style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">Flip Board</button>
-					<button onclick="sharePGN()" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">Share PGN</button>
+					<button style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">Flip Board</button>
+					<button onclick="flipBoard()" onclick="sharePGN()" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">Share PGN</button>
 				</div>
 			</div>
 
@@ -96,11 +96,6 @@
 		const depth_slider = document.getElementById('depth-slider');
 		const depthLabel = document.getElementById('depth-value');
 		const analyze_btn = document.getElementById('analyze-btn');
-		const board = new ChessBoard(document.getElementById("board"), {
-			position: "start",
-			assetsUrl: "https://cdn.jsdelivr.net/npm/cm-chessboard@5/assets/",
-			extensions: [{class: Markers}]
-		});
 
 		let engineReady = false;
 		let currentMoveIndex = 0;
@@ -120,7 +115,14 @@
 			6: { ico: "?", txt: "Mistake", col: "#eb7a34" },
 			7: { ico: "??", txt: "Blunder", col: "#e0201d" }
 		};
-
+		//Flip board
+		function flipBoard() {
+			const current = window.board.getOrientation();
+			const next = current === "white" ? "black" : "white";
+			window.board.setOrientation(next);
+			// Flip the eval bar so black's advantage is at the bottom when playing as black
+			document.getElementById('eval-bar-container').style.flexDirection = (next === "black") ? "column-reverse" : "column";
+		}
 		// Color Picker Button Code
 		let userColor = "w";
 		color_btn.onclick = function() {
@@ -147,7 +149,7 @@
 
 		function getLocalRating(move) {
 			const loss = move.m.includes('w') ? (move.pcp - move.cp) : (move.cp - move.pcp);
-			const isBest = move.san === move.bm;
+			const isBest = move.san === move.b;
 			// 1: Brilliant, 2: Best, 3: Excellent, 4: Good, 5: Inaccuracy, 6: Mistake, 7: Blunder
 			// NOTE: Brilliant moves will be left to the ai to decide.
 			if (isBest) return 2;
@@ -180,30 +182,38 @@
 		    if (!analysisResults || analysisResults.length === 0) return;
 		
 		    const move = analysisResults[currentMoveIndex];
-		    const r = ratingMap[move.c.AIRATE] || { txt: "Analysis", col: "#666", ico: "" };
+		    const r = ratingMap[move.r] || { txt: "Analysis", col: "#666", ico: "" };
 		
 			// Update Board 
 			board.setPosition(analysisPositions[currentMoveIndex]);
 			// Clear Arrows
 			board.removeMarkers();
 
-			// TODO - add board annotation
-			
+			if (move.b) {
+				const from = move.b.substring(0, 2);
+				const to = move.b.substring(2, 4);
+				board.addMarker(Markers.arrowGreen, from, to);
+			}
+			if (move.r >= 6) {
+				const from = move.u.substring(0, 2);
+				const to = move.u.substring(2, 4);
+				board.addMarker(Markers.arrowRed, from, to);
+			}
 		    // Logic: Only show Engine Suggestion if the move was NOT the best or brilliant (AIRATE 1 or 2)
-		    const isNotBest = move.c.AIRATE > 2;
-		
+		    const isNotBest = move.r > 2;
+			updateEvalBar(move.cp || 0);
 		    const reviewBox = document.getElementById('ai-review');
 		    reviewBox.innerHTML = `
 		        <div style="border-left: 6px solid ${r.col}; padding: 15px; background: white; border-radius: 0 8px 8px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
 		            <h3 style="margin: 0 0 8px 0; font-size: 1.1rem; color: #333;">
-		                ${move.san} is <span style="color: ${r.col};">${r.ico} ${r.txt}</span>
+		                ${move.s} is <span style="color: ${r.col};">${r.ico} ${r.txt}</span>
 		            </h3>
 		            <p style="margin: 0; color: #444; line-height: 1.5; font-size: 0.95rem;">
-		                ${move.c.AICOMM}
+		                ${move.aic}
 		            </p>
-		            ${(isNotBest && move.bm) ? `
+		            ${(isNotBest && move.b) ? `
 		                <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #eee; font-size: 0.85rem; color: #777;">
-		                    Engine Suggestion: <span style="color: #57ad42; font-weight: bold;">${move.bm}</span>
+		                    Engine Suggestion: <span style="color: #57ad42; font-weight: bold;">${move.b}</span>
 		                </div>
 		            ` : ""}
 		        </div>
@@ -251,12 +261,12 @@
 		    analysisResults.forEach((move, index) => {
 		        const moveNum = Math.floor(index / 2) + 1;
 		        const isWhite = move.m.includes('w');
-		        const r = ratingMap[move.c.AIRATE] || { ico: "" };
+		        const r = ratingMap[move.r] || { ico: "" };
 		
 		        if (isWhite) pgnString += `${moveNum}. `;
 		        
 		        // Add move, the icon (!!, ??), and the AI comment
-		        pgnString += `${move.san}${r.ico} {${move.c.AICOMM}} `;
+		        pgnString += `${move.s}${r.ico} ${move.aic ? `{${move.aic}} ` : ""}`;
 		    });
 		
 		    // Copy to clipboard
@@ -272,7 +282,7 @@
 		    let html = '<div style="display: flex; flex-wrap: wrap; gap: 10px; padding: 5px;">';
 		
 		    analysisResults.forEach((move, index) => {
-		        const r = ratingMap[move.c.AIRATE] || { ico: "", col: "transparent" };
+		        const r = ratingMap[move.r] || { ico: "", col: "transparent" };
 		        const isWhite = move.m.includes('w');
 		        
 		        if (isWhite) {
@@ -322,7 +332,7 @@
 					p: 0,  // this will be filled by engine - pre centipawn
 					t: clkMatch ? clkMatch[1] : undefined, // timestamp if available
 					b: "", // Bestmove
-					f: (index % 10 === 0) ? currentFen : undefined, // fen for every 10 moves on white
+					f: (index % 10 === 0) ? tempGame.fen() : undefined, // fen for every 10 moves on white
 					cm: cleanComm !== "" ? cleanComm : undefined, // comments (if available)
 				};
 			});
@@ -409,11 +419,11 @@
 				const bestMoveFound = moveParts[1];
 
 			    if (currentMoveIndex + 1 < analysisResults.length) {
-			        analysisResults[currentMoveIndex + 1].bm = bestMoveFound;
+			        analysisResults[currentMoveIndex + 1].b = bestMoveFound;
 			    }
 				
 			    analysisResults[currentMoveIndex].cp = latestScoredCP;
-				analysisResults[currentMoveIndex].c.AIRATE = getLocalRating(analysisResults[currentMoveIndex]);
+				analysisResults[currentMoveIndex].r = getLocalRating(analysisResults[currentMoveIndex]);
 			    if (currentMoveIndex + 1 < analysisResults.length) {
 			        analysisResults[currentMoveIndex + 1].pcp = latestScoredCP;
 			    }
@@ -453,55 +463,42 @@
 			try {
 				const vercelUrl = 'https://chess-pgn-analysis.vercel.app/api';
 
-				const payload = {
-					playerColor: userColor,
-					gameData: fullGameData,
-					headers: gameHeaders
-				}
-
 				// 2. Send the chess data to the Python function
 				const response = await fetch(vercelUrl, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(payload)
+					body: JSON.stringify({
+						playerColor: userColor,
+						gameData: fullGameData,
+						headers: gameHeaders
+					})
 				});
 
 				const aiData = await response.json();
 
 				// 3. Error check: see if Python or Gemini had a problem
 				if (aiData.error) {
-					document.getElementById('ai-review').innerHTML = `<b>Backend Error:</b> ${result.error}`;
+					document.getElementById('ai-review').innerHTML = `<b>Backend Error:</b> ${aiData.error}`;
 					return;
 				}
 
 				analysisResults = analysisResults.map(localMove => {
-					const insight = aiInsights.find(item => item.m === localMove.m);
-					if (insight) {
-						localMove.air = insight.air;
-						localMove.aic = insight.aic;
-					}
-					return localMove;
-				});
-				
-				const aiData = await response.json(); // Array of {m, aic, air?}
-				// Merge AI data into local Stockfish results
-				analysisResults = analysisResults.map(localMove => {
-					// Try to find if the AI had something to say about this specific move
 					const patch = aiData.find(ai => ai.m === localMove.m);
 					if (patch) {
-						// Update the comment
-						localMove.aic = patch.aic;
-						// ONLY override the rating if the AI specifically provided one (the "optional override")
+						// Add aic only if AI provided it
+						if (patch.aic) {
+							localMove.aic = patch.aic;
+						}
 						if (patch.air) {
 							localMove.r = patch.air;
 						}
 					}
 					return localMove;
 				});
+	
 				currentMoveIndex = 0;
 				updateMoveView();
-
-        console.log("Success! Full Data:", analysisResults);
+			
 			} catch (error) {
 				console.error("Connection Error:", error);
 				document.getElementById('ai-review').innerHTML = "Could not reach Python backend. Check console.";
