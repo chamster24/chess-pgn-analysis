@@ -22,6 +22,9 @@
 	<main style="display: flex; height: calc(100vh - 80px); overflow: hidden;">
 
 		<div id="board-area" style="flex: 6; background: #eee; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px; min-height: 0">
+			<div id="eval-bar-container" style="width: 25px; height: 400px; background: #333; border: 2px solid #555; display: flex; flex-direction: column; position: relative; border-radius: 4px; overflow: hidden; flex-shrink: 0;">
+				<div id="eval-bar-white" style="width: 100%; height: 50%; background: white; transition: height 0.3s ease-out;"></div>
+				<div id="eval-val-text" style="position: absolute; bottom: 5px; width: 100%; text-align: center; font-size: 10px; font-weight: bold; color: #4CAF50; background: rgba(255,255,255,0.8); z-index: 10;">0.0</div>
 			<div id="board" style="width: 100%; max-width: 450px;"></div>
 		</div>
 
@@ -209,6 +212,35 @@
 		    generateMoveList();
 		}
 
+		function formatEval(cp) {
+			if (Math.abs(cp) >= 9000) {
+				const moves = 10000 - Math.abs(cp);
+				return "M" + (cp > 0 ? "" : "-") + (moves <= 0 ? 0 : moves);
+			}
+			return (cp > 0 ? "+" : "") + (cp / 100).toFixed(1);
+		}
+		
+		function updateEvalBar(cp) {
+			const barWhite = document.getElementById('eval-bar-white');
+			const valText = document.getElementById('eval-val-text');
+			if (!barWhite) return;
+		
+			valText.innerText = formatEval(cp);
+			let score = cp / 100;
+			if (Math.abs(cp) >= 9000) score = cp > 0 ? 8 : -8;
+		
+			let percent = ((score + 8) / 16) * 100;
+			percent = Math.max(0, Math.min(100, percent));
+			barWhite.style.height = (100 - percent) + "%";
+		}
+		
+		function flipBoard() {
+			const current = window.board.getOrientation();
+			const next = current === "white" ? "black" : "white";
+			window.board.setOrientation(next);
+			document.getElementById('eval-bar-container').style.flexDirection = (next === "black") ? "column-reverse" : "column";
+		}
+		
 		function sharePGN() {
 		    if (analysisResults.length === 0) {
 		        alert("No analysis to share yet!");
@@ -274,34 +306,24 @@
         		analysisPositions.push(tempGame.fen()); // Store the FULL FEN string
 				
 				const moveNum = Math.floor(index / 2) + 1;
+				const isWhite = move.color === 'w';
 				const side = move.color === 'w' ? 'w' : 'b';
 				// Look for [%clk 0:00:00] in the move comments
-				let timestamp = "";
-				if (move.comments) {
-					const clkMatch = move.comments.join(" ").match(/\[%clk\s+([\d:]+)\]/);
-					timestamp = clkMatch ? clkMatch[1] : "";
-				}
+				const clkMatch = move.comments ? move.comments.join(" ").match(/\[%clk\s+([\d:]+)\]/) : null;
 
-				let originalComments = "";
-				if (move.comments) {
-					originalComments = move.comments
-						.join(" ")
-						.replace(/\[%clk\s+[\d:]+\]/g, "") // Strip the clock tag
-						.trim();
-				}
+				const cleanComm = move.comments ? 
+					move.comments.join(" ").replace(/\[%clk\s+[\d:]+\]/g, "").trim() : "";
+				
 				return {
-					m: `${moveNum}${side}`,
-					san: move.san,
-					uci: move.from + move.to,
-					cp: 0,   // This will be filled by engine
-					pcp: 0,  // This will be filled by engine
-					t: timestamp,
-					bm: "",
-					c: {
-						AIRATE: "", // This will be filled by ai
-						AICOMM: "", // This will be filled by ai
-						COMM: originalComments, // This will be filled by engine
-					}
+					m: `${moveNum}${side}`, // move number and side
+					s: move.san, // san
+					u: move.from + move.to, // uci
+					c: 0,   // this will be filled by engine - current centipawn
+					p: 0,  // this will be filled by engine - pre centipawn
+					t: clkMatch ? clkMatch[1] : undefined, // timestamp if available
+					b: "", // Bestmove
+					f: (index % 10 === 0) ? currentFen : undefined, // fen for every 10 moves on white
+					cm: cleanComm !== "" ? cleanComm : undefined, // comments (if available)
 				};
 			});
 
@@ -426,7 +448,7 @@
 		});
 
 		async function callGemini(fullGameData) {
-			document.getElementById('ai-review').innerHTML = "AI is thinking...";
+			document.getElementById('ai-review').innerHTML = "AI is thinking... (This may take a minute or two)";
 
 			try {
 				const vercelUrl = 'https://chess-pgn-analysis.vercel.app/api';
@@ -444,17 +466,40 @@
 					body: JSON.stringify(payload)
 				});
 
-				const result = await response.json();
+				const aiData = await response.json();
 
 				// 3. Error check: see if Python or Gemini had a problem
-				if (result.error) {
+				if (aiData.error) {
 					document.getElementById('ai-review').innerHTML = `<b>Backend Error:</b> ${result.error}`;
 					return;
 				}
-				analysisResults = result; // Save the AI-enhanced data
-				currentMoveIndex = 0;     // Reset to move 1
-				updateMoveView();         // Update the review box
-				// 4. Get the text from the Gemini response format
+
+				analysisResults = analysisResults.map(localMove => {
+					const insight = aiInsights.find(item => item.m === localMove.m);
+					if (insight) {
+						localMove.air = insight.air;
+						localMove.aic = insight.aic;
+					}
+					return localMove;
+				});
+				
+				const aiData = await response.json(); // Array of {m, aic, air?}
+				// Merge AI data into local Stockfish results
+				analysisResults = analysisResults.map(localMove => {
+					// Try to find if the AI had something to say about this specific move
+					const patch = aiData.find(ai => ai.m === localMove.m);
+					if (patch) {
+						// Update the comment
+						localMove.aic = patch.aic;
+						// ONLY override the rating if the AI specifically provided one (the "optional override")
+						if (patch.air) {
+							localMove.r = patch.air;
+						}
+					}
+					return localMove;
+				});
+				currentMoveIndex = 0;
+				updateMoveView();
 
         console.log("Success! Full Data:", analysisResults);
 			} catch (error) {
