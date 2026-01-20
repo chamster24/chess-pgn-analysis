@@ -43,8 +43,8 @@
 				    <button onclick="step(-1)" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">&lt;</button>
 				    <button onclick="step(1)" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">&gt;</button>
 				    <button onclick="jumpTo(analysisResults.length - 1)" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">&gt;|</button>
-					<button style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">Flip Board</button>
-					<button onclick="flipBoard()" onclick="sharePGN()" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">Share PGN</button>
+					<button onclick="flipBoard()" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">Flip Board</button>
+					<button onclick="sharePGN()" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">Share PGN</button>
 				</div>
 			</div>
 
@@ -74,6 +74,7 @@
 			<a href="https://github.com/chamster24/chess-pgn-analysis/blob/main/CREDITS.md" target="_blank" rel="noopener noreferrer">Credits</a></p>
 	</footer>
 
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@5/assets/styles/cm-chessboard.css">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@5/assets/extensions/markers/markers.css">
 	<script type="module">
@@ -85,8 +86,9 @@
 			assetsUrl: "https://cdn.jsdelivr.net/npm/cm-chessboard@5/assets/",
 			extensions: [{class: Markers}]
 		});
+		window.dispatchEvent(new Event('boardReady'));
 	</script>
-	
+
 	<script>
 		const game = new Chess();
 		const engine = new Worker('stockfish.js');
@@ -105,6 +107,12 @@
 		let latestScoredCP = 0;
 		let gotScoreForMove = false;
 		let retryCount = 0;
+		
+		let board;
+		window.addEventListener('boardReady', () => {
+			board = window.board;
+			console.log("Board initialized and ready.");
+		});
 
 		const ratingMap = {
 			1: { ico: "!!", txt: "Brilliant", col: "#22c9a8" },
@@ -115,14 +123,6 @@
 			6: { ico: "?", txt: "Mistake", col: "#eb7a34" },
 			7: { ico: "??", txt: "Blunder", col: "#e0201d" }
 		};
-		//Flip board
-		function flipBoard() {
-			const current = window.board.getOrientation();
-			const next = current === "white" ? "black" : "white";
-			window.board.setOrientation(next);
-			// Flip the eval bar so black's advantage is at the bottom when playing as black
-			document.getElementById('eval-bar-container').style.flexDirection = (next === "black") ? "column-reverse" : "column";
-		}
 		// Color Picker Button Code
 		let userColor = "w";
 		color_btn.onclick = function() {
@@ -443,9 +443,12 @@
 
 		// Check for valid PGN on button click, before running a game check
 		analyze_btn.addEventListener('click', function () {
+			if (board) {
+				board.setPosition(game.fen());
+			}
 			const pgnText = document.getElementById('pgn-input').value;
 			const isValid = game.load_pgn(pgnText);
-			board.position(game.fen());
+			board.setPosition(game.fen());
 			if (!isValid) {
 				alert("Invalid PGN!")
 			} else {
