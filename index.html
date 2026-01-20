@@ -81,20 +81,30 @@
 		import {Chessboard} from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/Chessboard.js";
 		import {Markers} from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/extensions/markers/Markers.js";
 		window.Markers = Markers;
-		async function initBoard() {
-			const boardInstance = new Chessboard(document.getElementById("board"), {
-				position: "start",
-				assetsUrl: "https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/",
-				style: { pieces: {type: "svg"} },
-				extensions: [{class: Markers}]
-			});
-			await boardInstance.initialized;
-			window.board = boardInstance;
-			console.log("Board is truly ready.");
-			document.getElementById('analyze-btn').disabled = false;
+
+		async function setupBoard() {
+			try {
+				const boardInstance = new Chessboard(document.getElementById("board"), {
+					// Remove 'position' from here to prevent the constructor crash
+					assetsUrl: "https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/",
+					style: { pieces: {type: "svg"} },
+					extensions: [{class: Markers}]
+				});
+
+				// Wait for the component to actually exist in the DOM
+				await boardInstance.initialized;
+				
+				// Now safely set the start position
+				await boardInstance.setPosition("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR", false);
+				
+				window.board = boardInstance;
+				console.log("Board successfully mounted and positioned.");
+			} catch (err) {
+				console.error("Board init failed:", err);
+			}
 		}
-	
-		initBoard().catch(console.error);
+
+		setupBoard();
 	</script>
 
 	<script>
