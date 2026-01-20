@@ -111,12 +111,6 @@
 		let latestScoredCP = 0;
 		let gotScoreForMove = false;
 		let retryCount = 0;
-		
-		let board;
-		window.addEventListener('boardReady', () => {
-			board = window.board;
-			console.log("Board initialized and ready.");
-		});
 
 		const ratingMap = {
 			1: { ico: "!!", txt: "Brilliant", col: "#22c9a8" },
@@ -189,19 +183,19 @@
 		    const r = ratingMap[move.r] || { txt: "Analysis", col: "#666", ico: "" };
 		
 			// Update Board 
-			board.setPosition(analysisPositions[currentMoveIndex]);
+			window.board.setPosition(analysisPositions[currentMoveIndex]);
 			// Clear Arrows
-			board.removeMarkers();
+			window.board.removeMarkers();
 
 			if (move.b) {
 				const from = move.b.substring(0, 2);
 				const to = move.b.substring(2, 4);
-				board.addMarker(Markers.arrowGreen, from, to);
+				window.board.addMarker(window.Markers.arrowGreen, from, to);
 			}
 			if (move.r >= 6) {
 				const from = move.u.substring(0, 2);
 				const to = move.u.substring(2, 4);
-				board.addMarker(Markers.arrowRed, from, to);
+				window.board.addMarker(window.Markers.arrowRed, from, to);
 			}
 		    // Logic: Only show Engine Suggestion if the move was NOT the best or brilliant (AIRATE 1 or 2)
 		    const isNotBest = move.r > 2;
@@ -237,7 +231,7 @@
 		function updateEvalBar(cp) {
 			const barWhite = document.getElementById('eval-bar-white');
 			const valText = document.getElementById('eval-val-text');
-			if (!barWhite) return;
+			if (!barWhite || !valText) return;
 		
 			valText.innerText = formatEval(cp);
 			let score = cp / 100;
@@ -452,8 +446,9 @@
 				return;
 			}
 			const pgnText = document.getElementById('pgn-input').value;
+			game.reset();
 			const isValid = game.load_pgn(pgnText);
-			board.setPosition(game.fen());
+			window.board.setPosition(game.fen());
 			if (!isValid) {
 				alert("Invalid PGN!")
 			}
