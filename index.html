@@ -81,14 +81,15 @@
 		import {Chessboard} from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/Chessboard.js";
 		import {Markers} from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/extensions/markers/Markers.js";
 		window.Markers = Markers;
-		window.board = new Chessboard(document.getElementById("board"), {
-			position: "start",
+		const boardInstance = new Chessboard(document.getElementById("board"), {
+			position: "start", // Explicitly set to avoid the 'replace' error
 			assetsUrl: "https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/",
 			style: {
-				pieces: {type: "svg"} // Required for version 8 to render SVG pieces correctly
+				pieces: {type: "svg"}
 			},
 			extensions: [{class: Markers}]
 		});
+		window.board = boardInstance;
 		window.dispatchEvent(new Event('boardReady'));
 	</script>
 
@@ -446,20 +447,21 @@
 
 		// Check for valid PGN on button click, before running a game check
 		analyze_btn.addEventListener('click', function () {
-			if (board) {
-				board.setPosition(game.fen());
+			if (!window.board) {
+				alert("Board is still loading, please wait a moment.");
+				return;
 			}
 			const pgnText = document.getElementById('pgn-input').value;
 			const isValid = game.load_pgn(pgnText);
 			board.setPosition(game.fen());
 			if (!isValid) {
 				alert("Invalid PGN!")
+			}
+			window.board.setPosition(game.fen());
+			if (!engineReady) {
+				alert("Error with stockfish. Please wait - it may still be loading.");
 			} else {
-				if (!engineReady === true) {
-					alert("Error with stockfish. Please wait - it may still be loading.")
-				} else {
-					analizegame();
-				}
+				analizegame();
 			}
 		});
 
