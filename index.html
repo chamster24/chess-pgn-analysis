@@ -75,15 +75,15 @@
 	</footer>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@5/assets/styles/cm-chessboard.css">
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@5/assets/extensions/markers/markers.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/chessboard.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/extensions/markers/markers.css">
 	<script type="module">
-		import {Chessboard} from "https://cdn.jsdelivr.net/npm/cm-chessboard@5/src/cm-chessboard/Chessboard.js";
-		import {Markers} from "https://cdn.jsdelivr.net/npm/cm-chessboard@5/src/cm-chessboard/extensions/markers/Markers.js";
+		import {Chessboard} from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/Chessboard.js";
+		import {Markers} from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/extensions/markers/Markers.js";
 		window.Markers = Markers;
 		window.board = new Chessboard(document.getElementById("board"), {
 			position: "start",
-			assetsUrl: "https://cdn.jsdelivr.net/npm/cm-chessboard@5/assets/",
+			assetsUrl: "https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/",
 			extensions: [{class: Markers}]
 		});
 		window.dispatchEvent(new Event('boardReady'));
