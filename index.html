@@ -81,16 +81,20 @@
 		import {Chessboard} from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/Chessboard.js";
 		import {Markers} from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/extensions/markers/Markers.js";
 		window.Markers = Markers;
-		const boardInstance = new Chessboard(document.getElementById("board"), {
-			position: "start",
-			assetsUrl: "https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/",
-			style: { pieces: {type: "svg"} },
-			extensions: [{class: Markers}]
-		});
-		boardInstance.initialized.then(() => {
+		async function initBoard() {
+			const boardInstance = new Chessboard(document.getElementById("board"), {
+				position: "start",
+				assetsUrl: "https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/",
+				style: { pieces: {type: "svg"} },
+				extensions: [{class: Markers}]
+			});
+			await boardInstance.initialized;
 			window.board = boardInstance;
-			console.log("Board fully ready");
-		});
+			console.log("Board is truly ready.");
+			document.getElementById('analyze-btn').disabled = false;
+		}
+	
+		initBoard().catch(console.error);
 	</script>
 
 	<script>
@@ -312,6 +316,10 @@
 			analysisResults = history.map((move, index) => {
 				tempGame.move(move); // Move the temp board forward
 				const currentFen = tempGame.fen();
+				if (!currentFen) {
+					console.error("Critical: tempGame returned empty FEN at index", index);
+					return;
+				}
         		analysisPositions.push(currentFen); // Store the FULL FEN string
 				
 				const moveNum = Math.floor(index / 2) + 1;
@@ -442,8 +450,9 @@
 
 		// Check for valid PGN on button click, before running a game check
 		analyze_btn.addEventListener('click', async function () {
-			if (!window.board) {
-				alert("Board is still loading, please wait a moment.");
+			if (!window.board || typeof window.board.setPosition !== 'function') {
+				console.error("Board instance or setPosition method not found. Retrying in 100ms...");
+				setTimeout(() => analyze_btn.click(), 100);
 				return;
 			}
 			const pgnText = document.getElementById('pgn-input').value;
@@ -453,11 +462,17 @@
 				alert("Invalid PGN!");
 				return;
 			}
-			await window.board.setPosition(game.fen(), true); 
-			if (!engineReady) {
-				alert("Error with stockfish. Please wait.");
-			} else {
-				analizegame();
+			try {
+				// In v8, setPosition returns a promise
+				await window.board.setPosition(game.fen(), true); 
+				
+				if (!engineReady) {
+					alert("Stockfish is still loading. Give it a second.");
+				} else {
+					analizegame();
+				}
+			} catch (e) {
+				console.error("Board setPosition failed:", e);
 			}
 		});
 
