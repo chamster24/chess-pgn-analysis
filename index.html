@@ -78,32 +78,33 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/chessboard.css">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/extensions/markers/markers.css">
 	<script type="module">
-		import {Chessboard} from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/Chessboard.js";
+import {Chessboard} from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/Chessboard.js";
 		import {Markers} from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/extensions/markers/Markers.js";
 		window.Markers = Markers;
-
+	
 		async function setupBoard() {
 			try {
+				// Initialize the board WITHOUT a 'position' property first to avoid the .replace() crash
 				const boardInstance = new Chessboard(document.getElementById("board"), {
-					// Remove 'position' from here to prevent the constructor crash
 					assetsUrl: "https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/",
 					style: { pieces: {type: "svg"} },
 					extensions: [{class: Markers}]
 				});
-
-				// Wait for the component to actually exist in the DOM
+	
+				// Wait for the internal library promise to resolve
 				await boardInstance.initialized;
 				
-				// Now safely set the start position
+				// Set the start position safely after initialization
 				await boardInstance.setPosition("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR", false);
 				
 				window.board = boardInstance;
-				console.log("Board successfully mounted and positioned.");
+				console.log("Board successfully mounted and ready.");
 			} catch (err) {
 				console.error("Board init failed:", err);
+				// If it still fails, check if the #board div has width/height in CSS
 			}
 		}
-
+	
 		setupBoard();
 	</script>
 
