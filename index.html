@@ -21,11 +21,11 @@
 
 	<main style="display: flex; height: calc(100vh - 80px); overflow: hidden;">
 
-		<div id="board-area" style="flex: 6; background: #eee; display: flex; flex-direction: row; justify-content: center; align-items: center; padding: 10px; min-height: 0">
-			<div id="eval-bar-container" style="width: 25px; height: 400px; background: #333; border: 2px solid #555; display: flex; flex-direction: column; position: relative; border-radius: 4px; overflow: hidden; flex-shrink: 0;">
+		<div id="board-area" style="flex: 6; background: #eee; display: flex; flex-direction: row; justify-content: center; align-items: center; padding: 20px; min-height: 0; gap: 30px;">
+			<div id="eval-bar-container" style="width: 25px; height: 400px; background: #333; border: 2px solid #555; display: flex; flex-direction: column; position: relative; border-radius: 4px; overflow: hidden; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
 				<div id="eval-bar-white" style="width: 100%; height: 50%; background: white; transition: height 0.3s ease-out;"></div>
 				<div id="eval-val-text" style="position: absolute; bottom: 5px; width: 100%; text-align: center; font-size: 10px; font-weight: bold; color: #4CAF50; background: rgba(255,255,255,0.8); z-index: 10;">0.0</div>
-			</div><div id="board" style="width: 100%; max-width: 450px;"></div>
+			</div><div id="board" style="width: 100%; max-width: 450px; aspect-ratio: 1/1; box-shadow: 0 5px 15px rgba(0,0,0,0.1);"></div>
 		</div>
 
 		<div id="analysis-area" style="flex: 4; display: flex; flex-direction: column; padding: 20px; border-left: 1px solid #ccc; background: white; height: 100%; box-sizing: border-box;">
