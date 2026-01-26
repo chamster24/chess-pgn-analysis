@@ -39,10 +39,10 @@
 					<p style="color: #888;">Moves will appear here...</p>
 				</div>
 				<div id="nav-controls" style="flex-shrink: 0; display: flex; gap: 5px; padding: 10px; border-top: 1px solid #eee;">
-				    <button onclick="jumpTo(0)" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">|&lt;</button>
-				    <button onclick="step(-1)" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">&lt;</button>
-				    <button onclick="step(1)" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">&gt;</button>
-				    <button onclick="jumpTo(analysisResults.length - 1)" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">&gt;|</button>
+					<button onclick="jumpTo(0)" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">|&lt;</button>
+					<button onclick="step(-1)" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">&lt;</button>
+					<button onclick="step(1)" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">&gt;</button>
+					<button onclick="jumpTo(analysisResults.length - 1)" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">&gt;|</button>
 					<button onclick="flipBoard()" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">Flip Board</button>
 					<button onclick="sharePGN()" style="flex: 1; padding: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">Share PGN</button>
 				</div>
@@ -50,18 +50,18 @@
 
 			<div id="controls" style="flex-shrink: 0; padding-top: 10px;">
 				<textarea id="pgn-input" placeholder="Paste PGN here..." style="width: 100%; height: 50px; padding: 8px; resize: none; box-sizing: border-box;"></textarea>
-    			<div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px;">
-        			<div style="flex: 3;">
-            			<label style="font-size: 11px; font-weight: bold; display: block;">DEPTH: <span id="depth-value">8</span></label>
-            			<input type="range" id="depth-slider" min="1" max="20" value="8" style="width: 100%; accent-color: #4CAF50;">
-        			</div>
-        			<div style="text-align: center; flex: 0.8;">
-            		<div id="color-btn" style="width: 35px; height: 35px; border-radius: 50%; border: 3px solid #4CAF50; margin: 0 auto; cursor: pointer; background: white;"></div>
-            			<span id="color-name" style="font-size: 9px; font-weight: bold; text-align: center;">I'm White</span>
-        			</div>
-        			<button id="analyze-btn" style="flex: 1.4; padding: 10px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">
-            			ANALYZE GAME
-        			</button>
+				<div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px;">
+					<div style="flex: 3;">
+						<label style="font-size: 11px; font-weight: bold; display: block;">DEPTH: <span id="depth-value">8</span></label>
+						<input type="range" id="depth-slider" min="1" max="20" value="8" style="width: 100%; accent-color: #4CAF50;">
+					</div>
+					<div style="text-align: center; flex: 0.8;">
+						<div id="color-btn" style="width: 35px; height: 35px; border-radius: 50%; border: 3px solid #4CAF50; margin: 0 auto; cursor: pointer; background: white;"></div>
+						<span id="color-name" style="font-size: 9px; font-weight: bold; text-align: center;">I'm White</span>
+					</div>
+					<button id="analyze-btn" style="flex: 1.4; padding: 10px; cursor: pointer; background: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px;">
+						ANALYZE GAME
+					</button>
 				</div>
 			</div>
 		</div>
@@ -69,7 +69,7 @@
 	</main>
 
 	<footer style="height: 30px; background: #444; color: white; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-		<p style="text-align: center;">&copy; 2025 cHamster24. Some rights reserved. | 
+		<p style="text-align: center;">&copy; 2026 cHamster24. Some rights reserved. | 
 			<a href="https://github.com/chamster24/chess-pgn-analysis/" target="_blank" rel="noopener noreferrer">Github</a> | 
 			<a href="https://github.com/chamster24/chess-pgn-analysis/blob/main/CREDITS.md" target="_blank" rel="noopener noreferrer">Credits</a></p>
 	</footer>
@@ -77,34 +77,26 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/chessboard.css">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/extensions/markers/markers.css">
+	
 	<script type="module">
-import {Chessboard} from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/Chessboard.js";
+		import {Chessboard} from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/Chessboard.js";
 		import {Markers} from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/extensions/markers/Markers.js";
 		window.Markers = Markers;
 	
 		async function setupBoard() {
 			try {
-				// Initialize the board WITHOUT a 'position' property first to avoid the .replace() crash
 				const boardInstance = new Chessboard(document.getElementById("board"), {
 					assetsUrl: "https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/",
 					style: { pieces: {type: "svg"} },
 					extensions: [{class: Markers}]
 				});
-	
-				// Wait for the internal library promise to resolve
 				await boardInstance.initialized;
-				
-				// Set the start position safely after initialization
 				await boardInstance.setPosition("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR", false);
-				
 				window.board = boardInstance;
-				console.log("Board successfully mounted and ready.");
 			} catch (err) {
 				console.error("Board init failed:", err);
-				// If it still fails, check if the #board div has width/height in CSS
 			}
 		}
-	
 		setupBoard();
 	</script>
 
@@ -120,7 +112,7 @@ import {Chessboard} from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/Chess
 
 		let engineReady = false;
 		let currentMoveIndex = 0;
-		let analysisResults = []; // This will store the JSON for the AI
+		let analysisResults = [];
 		let analysisPositions = [];
 		let gameHeaders = {};
 		let latestScoredCP = 0;
@@ -136,7 +128,7 @@ import {Chessboard} from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/Chess
 			6: { ico: "?", txt: "Mistake", col: "#eb7a34" },
 			7: { ico: "??", txt: "Blunder", col: "#e0201d" }
 		};
-		// Color Picker Button Code
+
 		let userColor = "w";
 		color_btn.onclick = function() {
 			if (userColor === "w") {
@@ -152,19 +144,17 @@ import {Chessboard} from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/Chess
 				color_btn.style.backgroundColor = '#FFFFFF';
 				color_name.innerText = "I'm white";
 			}
-			console.log("User changed color to:", userColor)
 		}
 
 		document.addEventListener('keydown', (e) => {
-		    if (e.key === "ArrowLeft") step(-1);
-		    if (e.key === "ArrowRight") step(1);
+			if (e.key === "ArrowLeft") step(-1);
+			if (e.key === "ArrowRight") step(1);
 		});
 
 		function getLocalRating(move) {
+			if (!move.pcp && move.pcp !== 0) return 2;
 			const loss = move.m.includes('w') ? (move.pcp - move.cp) : (move.cp - move.pcp);
 			const isBest = move.san === move.b;
-			// 1: Brilliant, 2: Best, 3: Excellent, 4: Good, 5: Inaccuracy, 6: Mistake, 7: Blunder
-			// NOTE: Brilliant moves will be left to the ai to decide.
 			if (isBest) return 2;
 			if (loss <= 20) return 3;
 			if (loss <= 50) return 4;
@@ -174,188 +164,101 @@ import {Chessboard} from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/Chess
 		}
 		
 		function jumpTo(index) {
-		    if (analysisResults.length === 0) return;
-		    // Ensure index is within 0 and the last move
-		    currentMoveIndex = Math.max(0, Math.min(index, analysisResults.length - 1));
-		    updateMoveView();
-			// Auto-scroll the PGN list to the active move
-		    const activeElement = document.querySelector(`#pgn span[onclick="jumpTo(${index})"]`);
-		    if (activeElement) {
-		        activeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-		    }
+			if (analysisResults.length === 0) return;
+			currentMoveIndex = Math.max(0, Math.min(index, analysisResults.length - 1));
+			updateMoveView();
+			const activeElement = document.querySelector(`#pgn span[onclick="jumpTo(${index})"]`);
+			if (activeElement) activeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 		}
 		
 		function step(delta) {
-		    if (analysisResults.length === 0) return;
-		    
-		    let newIndex = currentMoveIndex + delta;
-		    jumpTo(newIndex);
+			if (analysisResults.length === 0) return;
+			jumpTo(currentMoveIndex + delta);
 		}
+
 		function updateMoveView() {
-		    if (!analysisResults || analysisResults.length === 0 || !window.board) return;
-		
-		    const move = analysisResults[currentMoveIndex];
-		    const r = ratingMap[move.r] || { txt: "Analysis", col: "#666", ico: "" };
-		
-			// Update Board 
+			if (!analysisResults || analysisResults.length === 0 || !window.board) return;
+			const move = analysisResults[currentMoveIndex];
+			if (!move) return;
+
+			const r = ratingMap[move.r] || { txt: "Analysis", col: "#666", ico: "" };
 			window.board.setPosition(analysisPositions[currentMoveIndex], false);
-			// Clear Arrows
 			window.board.removeMarkers();
 
-			if (move.b) {
-				const from = move.b.substring(0, 2);
-				const to = move.b.substring(2, 4);
-				window.board.addMarker(window.Markers.arrowGreen, from, to);
+			if (move.b && move.b.length >= 4) {
+				window.board.addMarker(window.Markers.arrowGreen, move.b.substring(0, 2), move.b.substring(2, 4));
 			}
-			if (move.r >= 6) {
-				const from = move.u.substring(0, 2);
-				const to = move.u.substring(2, 4);
-				window.board.addMarker(window.Markers.arrowRed, from, to);
+			if (move.r >= 6 && move.u && move.u.length >= 4) {
+				window.board.addMarker(window.Markers.arrowRed, move.u.substring(0, 2), move.u.substring(2, 4));
 			}
-		    // Logic: Only show Engine Suggestion if the move was NOT the best or brilliant (AIRATE 1 or 2)
-		    const isNotBest = move.r > 2;
+
 			updateEvalBar(move.cp || 0);
-		    const reviewBox = document.getElementById('ai-review');
-		    reviewBox.innerHTML = `
-		        <div style="border-left: 6px solid ${r.col}; padding: 15px; background: white; border-radius: 0 8px 8px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-		            <h3 style="margin: 0 0 8px 0; font-size: 1.1rem; color: #333;">
-		                ${move.s} is <span style="color: ${r.col};">${r.ico} ${r.txt}</span>
-		            </h3>
-		            <p style="margin: 0; color: #444; line-height: 1.5; font-size: 0.95rem;">
-		                ${move.aic}
-		            </p>
-		            ${(isNotBest && move.b) ? `
-		                <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #eee; font-size: 0.85rem; color: #777;">
-		                    Engine Suggestion: <span style="color: #57ad42; font-weight: bold;">${move.b}</span>
-		                </div>
-		            ` : ""}
-		        </div>
-		    `;
-		    // Refresh move list to update the "active" move highlighting
-		    generateMoveList();
+			const reviewBox = document.getElementById('ai-review');
+			const title = (currentMoveIndex === 0) ? "Game Summary" : `${move.s} is <span style="color: ${r.col};">${r.ico} ${r.txt}</span>`;
+			
+			reviewBox.innerHTML = `
+				<div style="border-left: 6px solid ${r.col}; padding: 15px; background: white; border-radius: 0 8px 8px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+					<h3 style="margin: 0 0 8px 0; font-size: 1.1rem; color: #333;">${title}</h3>
+					<p style="margin: 0; color: #444; line-height: 1.5; font-size: 0.95rem;">${move.aic || "Waiting for AI..."}</p>
+				</div>
+			`;
+			generateMoveList();
 		}
 
 		function formatEval(cp) {
-			if (Math.abs(cp) >= 9000) {
-				const moves = 10000 - Math.abs(cp);
-				return "M" + (cp > 0 ? "" : "-") + (moves <= 0 ? 0 : moves);
-			}
+			if (Math.abs(cp) >= 9000) return "M" + (cp > 0 ? "" : "-") + (10000 - Math.abs(cp));
 			return (cp > 0 ? "+" : "") + (cp / 100).toFixed(1);
 		}
 		
 		function updateEvalBar(cp) {
 			const barWhite = document.getElementById('eval-bar-white');
 			const valText = document.getElementById('eval-val-text');
-			if (!barWhite || !valText) return;
-		
 			valText.innerText = formatEval(cp);
 			let score = cp / 100;
 			if (Math.abs(cp) >= 9000) score = cp > 0 ? 8 : -8;
-		
-			let percent = ((score + 8) / 16) * 100;
-			percent = Math.max(0, Math.min(100, percent));
+			let percent = Math.max(0, Math.min(100, ((score + 8) / 16) * 100));
 			barWhite.style.height = (100 - percent) + "%";
 		}
 		
 		function flipBoard() {
-			const current = window.board.getOrientation();
-			const next = current === "white" ? "black" : "white";
+			const next = window.board.getOrientation() === "white" ? "black" : "white";
 			window.board.setOrientation(next);
 			document.getElementById('eval-bar-container').style.flexDirection = (next === "black") ? "column-reverse" : "column";
 		}
 		
-		function sharePGN() {
-		    if (analysisResults.length === 0) {
-		        alert("No analysis to share yet!");
-		        return;
-		    }
-		
-		    let pgnString = "";
-		    analysisResults.forEach((move, index) => {
-		        const moveNum = Math.floor(index / 2) + 1;
-		        const isWhite = move.m.includes('w');
-		        const r = ratingMap[move.r] || { ico: "" };
-		
-		        if (isWhite) pgnString += `${moveNum}. `;
-		        
-		        // Add move, the icon (!!, ??), and the AI comment
-		        pgnString += `${move.s}${r.ico} ${move.aic ? `{${move.aic}} ` : ""}`;
-		    });
-		
-		    // Copy to clipboard
-		    navigator.clipboard.writeText(pgnString.trim()).then(() => {
-		        alert("Full analyzed PGN copied to clipboard!");
-		    }).catch(err => {
-		        console.error('Could not copy text: ', err);
-		    });
-		}
-		
 		function generateMoveList() {
-		    const pgnContainer = document.getElementById('pgn');
-		    let html = '<div style="display: flex; flex-wrap: wrap; gap: 10px; padding: 5px;">';
-		
-		    analysisResults.forEach((move, index) => {
-		        const r = ratingMap[move.r] || { ico: "", col: "transparent" };
-		        const isWhite = move.m.includes('w');
-		        
-		        if (isWhite) {
-		            html += `<span style="color: #888; font-weight: bold; margin-right: 2px;">${Math.floor(index/2) + 1}.</span>`;
-		        }
-		
-		        // Create a "hyperlink" using a span with a click event
-		        html += `
-		            <span onclick="jumpTo(${index})" style="cursor: pointer; font-weight: ${currentMoveIndex === index ? 'bold' : 'normal'}; color: ${currentMoveIndex === index ? '#4CAF50' : '#333'}; padding: 2px 4px; border-radius: 3px; background: ${currentMoveIndex === index ? '#e8f5e9' : 'transparent'};">
-		                ${move.san}<span style="color: ${r.col}; font-size: 0.8rem; margin-left: 2px; vertical-align: super;">${r.ico}</span>
-		            </span>
-		        `;
-		    });
-		
-		    html += '</div>';
-		    pgnContainer.innerHTML = html;
-		}
-
-		
-		function analizegame() {
-			// Reset engine state
-			currentMoveIndex = 0;
-			const history = game.history({ verbose: true });
-			const tempGame = new Chess(); 
-    		analysisPositions = [];
-			gameHeaders = game.header();
-
-			// Create the empty slots for scores
-			analysisResults = history.map((move, index) => {
-				tempGame.move(move); // Move the temp board forward
-				const currentFen = tempGame.fen();
-				if (!currentFen) {
-					console.error("Critical: tempGame returned empty FEN at index", index);
+			const pgnContainer = document.getElementById('pgn');
+			let html = '<div style="display: flex; flex-wrap: wrap; gap: 10px; padding: 5px;">';
+			analysisResults.forEach((move, index) => {
+				if (index === 0) {
+					html += `<div onclick="jumpTo(0)" style="width: 100%; cursor: pointer; color: #4CAF50; border-bottom: 1px solid #eee; margin-bottom: 5px; font-weight: ${currentMoveIndex === 0 ? 'bold' : 'normal'}">📋 Start / Summary</div>`;
 					return;
 				}
-        		analysisPositions.push(currentFen); // Store the FULL FEN string
-				
-				const moveNum = Math.floor(index / 2) + 1;
-				const isWhite = move.color === 'w';
-				const side = move.color === 'w' ? 'w' : 'b';
-				// Look for [%clk 0:00:00] in the move comments
-				const clkMatch = move.comments ? move.comments.join(" ").match(/\[%clk\s+([\d:]+)\]/) : null;
+				const r = ratingMap[move.r] || { ico: "", col: "transparent" };
+				if (move.m.includes('w')) html += `<span style="color: #888; font-weight: bold;">${Math.floor((index-1)/2)+1}.</span>`;
+				html += `<span onclick="jumpTo(${index})" style="cursor: pointer; color: ${currentMoveIndex === index ? '#4CAF50' : '#333'}; font-weight: ${currentMoveIndex === index ? 'bold' : 'normal'}">${move.s}<span style="color: ${r.col}; vertical-align: super; font-size: 0.7rem;">${r.ico}</span></span>`;
+			});
+			pgnContainer.innerHTML = html + '</div>';
+		}
 
-				const cleanComm = move.comments ? 
-					move.comments.join(" ").replace(/\[%clk\s+[\d:]+\]/g, "").trim() : "";
-				
-				return {
-					m: `${moveNum}${side}`, // move number and side
-					s: move.san, // san
-					u: move.from + move.to, // uci
-					c: 0,   // this will be filled by engine - current centipawn
-					p: 0,  // this will be filled by engine - pre centipawn
-					t: clkMatch ? clkMatch[1] : undefined, // timestamp if available
-					b: "", // Bestmove
-					f: (index % 20 === 0) ? tempGame.fen() : undefined, // fen for every 10 moves on white
-					cm: cleanComm !== "" ? cleanComm : undefined, // comments (if available)
-				};
+		function analizegame() {
+			currentMoveIndex = 0;
+			const history = game.history({ verbose: true });
+			analysisPositions = ["rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"];
+			analysisResults = [{ m: "0", s: "Start", u: "", aic: "Game Summary", r: 4, cp: 0, pcp: 0, b: "" }];
+
+			const tempGame = new Chess();
+			history.forEach((move, index) => {
+				tempGame.move(move);
+				analysisPositions.push(tempGame.fen());
+				analysisResults.push({
+					m: `${Math.floor(index / 2) + 1}${move.color}`,
+					s: move.san,
+					u: move.from + move.to,
+					cp: 0, pcp: 0, b: "", r: 4
+				});
 			});
 
-			//analysisPositions = history.map(m => m.after); //commented for debug
 			engine.postMessage("ucinewgame");
 			engine.postMessage("isready");
 			analyzeNextPosition();
@@ -366,175 +269,60 @@ import {Chessboard} from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/Chess
 				callGemini(analysisResults);
 				return;
 			}
-			
-			const fen = analysisPositions[currentMoveIndex];
-			const depth = depth_slider.value;
-			gotScoreForMove = false;
-			
-			// DEBUG - uncomment next line
-			// console.log("Analyzing FEN:", fen);
-			
-			document.getElementById('ai-review').innerHTML = `Analyzing move ${currentMoveIndex + 1}...`;
-
+			document.getElementById('ai-review').innerHTML = `Analyzing position ${currentMoveIndex}...`;
 			engine.postMessage(`stop`);
-			engine.postMessage(`position fen ${fen}`);
-			if (retryCount > 0) {
-				engine.postMessage(`go depth ${depth} movetime 1000`);
-			} else {
-				engine.postMessage(`go depth ${depth}`);
-			}
+			engine.postMessage(`position fen ${analysisPositions[currentMoveIndex]}`);
+			engine.postMessage(`go depth ${depth_slider.value}`);
 		}
-		// Update the number for slider moves
-		depth_slider.oninput = function () {
-			depthLabel.innerHTML = this.value;
-		};
-
-		// recieves messages from stockfish
-		engine.postMessage('uci');
 
 		engine.onmessage = function (event) {
 			const line = event.data;
-			// DEBUG - uncomment next line
-			// console.log("SF:", line);
-
-			if (line === "uciok") {
-				engineReady = true;
-				console.log("Engine is Ready");
-			}
-
-			// 1. Capture the latest evaluation
+			if (line === "uciok") engineReady = true;
 			if (line.includes("info") && line.includes("score")) {
 				const parts = line.split(" ");
-				if (analysisPositions[currentMoveIndex] && line.includes("cp")) {
-					const cpIndex = parts.indexOf("cp");
+				const cpIndex = parts.indexOf("cp");
+				if (cpIndex !== -1) {
 					latestScoredCP = parseInt(parts[cpIndex + 1]);
-					const currentFen = analysisPositions[currentMoveIndex];
-					if (currentFen.includes(" b ")) {
-						latestScoredCP = -latestScoredCP;
-					}
-					gotScoreForMove = true;
-					// console.log("Caught CP:", latestScoredCP);
-				} else if (line.includes("mate")) {
-					const parts = line.split(" "); // Re-declaring parts for the mate line
-					const mateIndex = parts.indexOf("mate");
-					const mateValue = parseInt(parts[mateIndex + 1]);
-					latestScoredCP = mateValue > 0 ? 10000 : -10000;
+					if (analysisPositions[currentMoveIndex].includes(" b ")) latestScoredCP = -latestScoredCP;
 					gotScoreForMove = true;
 				}
 			}
-		
-			// 2. Only move forward when Stockfish says it's done
 			if (line.startsWith("bestmove")) {
-				
-				if (gotScoreForMove === false && retryCount < 1) {
-					console.log(`No score line caught. Retrying...`);
-					retryCount++;
-					analyzeNextPosition(); 
-					return;
-				}
-
-				const moveParts = line.split(" ");
-				const bestMoveFound = moveParts[1];
-
-			    if (currentMoveIndex + 1 < analysisResults.length) {
-			        analysisResults[currentMoveIndex + 1].b = bestMoveFound;
-			    }
-				
-			    analysisResults[currentMoveIndex].cp = latestScoredCP;
+				const bestMove = line.split(" ")[1];
+				if (currentMoveIndex + 1 < analysisResults.length) analysisResults[currentMoveIndex + 1].b = bestMove;
+				analysisResults[currentMoveIndex].cp = latestScoredCP;
 				analysisResults[currentMoveIndex].r = getLocalRating(analysisResults[currentMoveIndex]);
-			    if (currentMoveIndex + 1 < analysisResults.length) {
-			        analysisResults[currentMoveIndex + 1].pcp = latestScoredCP;
-			    }
-
-				console.log(`Move ${analysisResults[currentMoveIndex].m}: ${latestScoredCP}`);
-				currentMoveIndex++;
-				if (currentMoveIndex < analysisPositions.length) {
-					retryCount = 0;
-					gotScoreForMove = false;
-					analyzeNextPosition();
-				} else {
-					document.getElementById('ai-review').innerHTML = "<b>Stockfish Complete!</b> Sending to Gemini for Analysis...";
-					callGemini(analysisResults);
-				}
-			}
-		}; 
-
-		// Check for valid PGN on button click, before running a game check
-		analyze_btn.addEventListener('click', async function () {
-			if (!window.board || typeof window.board.setPosition !== 'function') {
-				console.error("Board instance or setPosition method not found. Retrying in 100ms...");
-				setTimeout(() => analyze_btn.click(), 100);
-				return;
-			}
-			const pgnText = document.getElementById('pgn-input').value;
-			game.reset();
-			const isValid = game.load_pgn(pgnText);
-			if (!isValid) {
-				alert("Invalid PGN!");
-				return;
-			}
-			try {
-				// In v8, setPosition returns a promise
-				await window.board.setPosition(game.fen(), true); 
+				if (currentMoveIndex + 1 < analysisResults.length) analysisResults[currentMoveIndex + 1].pcp = latestScoredCP;
 				
-				if (!engineReady) {
-					alert("Stockfish is still loading. Give it a second.");
-				} else {
-					analizegame();
-				}
-			} catch (e) {
-				console.error("Board setPosition failed:", e);
+				currentMoveIndex++;
+				gotScoreForMove = false;
+				analyzeNextPosition();
 			}
+		};
+
+		analyze_btn.addEventListener('click', () => {
+			if (!game.load_pgn(document.getElementById('pgn-input').value)) return alert("Invalid PGN");
+			analizegame();
 		});
 
 		async function callGemini(fullGameData) {
-			document.getElementById('ai-review').innerHTML = "AI is thinking... (This may take a minute or two)";
-
+			document.getElementById('ai-review').innerHTML = "AI is thinking...";
 			try {
-				const vercelUrl = 'https://chess-pgn-analysis.vercel.app/api';
-
-				// 2. Send the chess data to the Python function
-				const response = await fetch(vercelUrl, {
+				const response = await fetch('https://chess-pgn-analysis.vercel.app/api', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						playerColor: userColor,
-						gameData: fullGameData,
-						headers: gameHeaders
-					})
+					body: JSON.stringify({ playerColor: userColor, gameData: fullGameData, headers: game.header() })
 				});
-
 				const aiData = await response.json();
-
-				// 3. Error check: see if Python or Gemini had a problem
-				if (aiData.error) {
-					document.getElementById('ai-review').innerHTML = `<b>Backend Error:</b> ${aiData.error}`;
-					return;
-				}
-
-				analysisResults = analysisResults.map(localMove => {
-					const patch = aiData.find(ai => ai.m === localMove.m);
-					if (patch) {
-						// Add aic only if AI provided it
-						if (patch.aic) {
-							localMove.aic = patch.aic;
-						}
-						if (patch.air) {
-							localMove.r = patch.air;
-						}
-					}
-					return localMove;
+				analysisResults = analysisResults.map(local => {
+					const patch = aiData.find(ai => ai.m === local.m);
+					if (patch) { local.aic = patch.aic; local.r = patch.air || local.r; }
+					return local;
 				});
-	
 				currentMoveIndex = 0;
 				updateMoveView();
-			
-			} catch (error) {
-				console.error("Connection Error:", error);
-				document.getElementById('ai-review').innerHTML = "Could not reach Python backend. Check console.";
-			}
+			} catch (e) { document.getElementById('ai-review').innerHTML = "AI Error. Check console."; }
 		}
 	</script>
 </body>
-
 </html>
