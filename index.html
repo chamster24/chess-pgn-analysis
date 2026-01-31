@@ -119,6 +119,10 @@
 		let gotScoreForMove = false;
 		let retryCount = 0;
 
+		depth_slider.oninput = function() {
+			depthLabel.innerText = this.value;
+		};
+		
 		const ratingMap = {
 			1: { ico: "!!", txt: "Brilliant", col: "#22c9a8" },
 			2: { ico: "⭐", txt: "Best", col: "#57ad42" },
@@ -176,26 +180,38 @@
 			jumpTo(currentMoveIndex + delta);
 		}
 
-		function updateMoveView() {
+		async function updateMoveView() {
 			if (!analysisResults || analysisResults.length === 0 || !window.board) return;
 			const move = analysisResults[currentMoveIndex];
 			if (!move) return;
 
 			const r = ratingMap[move.r] || { txt: "Analysis", col: "#666", ico: "" };
-			window.board.setPosition(analysisPositions[currentMoveIndex], false);
+			
+			await window.board.setPosition(analysisPositions[currentMoveIndex], true);
 			window.board.removeMarkers();
 
-			if (move.b && move.b.length >= 4) {
-				window.board.addMarker(window.Markers.arrowGreen, move.b.substring(0, 2), move.b.substring(2, 4));
+			if (move.b && typeof move.b === 'string' && move.b.length >= 4) {
+				const from = move.b.substring(0, 2);
+				const to = move.b.substring(2, 4);
+				// Only draw if both squares are valid strings
+				if (from && to) {
+					window.board.addMarker(window.Markers.arrowGreen, from, to);
+				} else if (move.r >= 2) {
+					console.log(`Could not draw bestmove for move ${move.m}`)
+				}
 			}
-			if (move.r >= 6 && move.u && move.u.length >= 4) {
-				window.board.addMarker(window.Markers.arrowRed, move.u.substring(0, 2), move.u.substring(2, 4));
+			if (move.r >= 6 && move.u && typeof move.u === 'string' && move.u.length >= 4) {
+				const uFrom = move.u.substring(0, 2);
+				const uTo = move.u.substring(2, 4);
+				if (uFrom && uTo) {
+					window.board.addMarker(window.Markers.arrowRed, uFrom, uTo);
+				}
 			}
 
 			updateEvalBar(move.cp || 0);
+			
 			const reviewBox = document.getElementById('ai-review');
 			const title = (currentMoveIndex === 0) ? "Game Summary" : `${move.s} is <span style="color: ${r.col};">${r.ico} ${r.txt}</span>`;
-			
 			reviewBox.innerHTML = `
 				<div style="border-left: 6px solid ${r.col}; padding: 15px; background: white; border-radius: 0 8px 8px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
 					<h3 style="margin: 0 0 8px 0; font-size: 1.1rem; color: #333;">${title}</h3>
