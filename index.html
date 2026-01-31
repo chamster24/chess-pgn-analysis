@@ -193,13 +193,11 @@
 			if (move.b && typeof move.b === 'string' && move.b.length >= 4) {
 				const from = move.b.substring(0, 2);
 				const to = move.b.substring(2, 4);
-				// Only draw if both squares are valid strings
-				if (from && to) {
-					window.board.addMarker(window.Markers.arrowGreen, from, to);
-				} else if (move.r >= 2) {
-					console.log(`Could not draw bestmove for move ${move.m}`)
-				}
+				window.board.addMarker(window.Markers.arrowGreen, from, to);
+			} else if (move.r >= 2) {
+				console.log(`No valid bestmove string for move ${move.m}`);
 			}
+
 			if (move.r >= 6 && move.u && typeof move.u === 'string' && move.u.length >= 4) {
 				const uFrom = move.u.substring(0, 2);
 				const uTo = move.u.substring(2, 4);
@@ -221,18 +219,33 @@
 			generateMoveList();
 		}
 
-		function formatEval(cp) {
-			if (Math.abs(cp) >= 9000) return "M" + (cp > 0 ? "" : "-") + (10000 - Math.abs(cp));
-			return (cp > 0 ? "+" : "") + (cp / 100).toFixed(1);
+		function formatEval(val) {
+			// Strings (mates)
+			if (typeof val === 'string' && (val.includes("M"))) {
+				return val; 
+			}
+			// Numbers (Centipawns)
+			let score = (val / 100).toFixed(1);
+			return (val > 0 ? "+" : "") + score;
 		}
 		
-		function updateEvalBar(cp) {
+		function updateEvalBar(val) {
 			const barWhite = document.getElementById('eval-bar-white');
 			const valText = document.getElementById('eval-val-text');
-			valText.innerText = formatEval(cp);
-			let score = cp / 100;
-			if (Math.abs(cp) >= 9000) score = cp > 0 ? 8 : -8;
-			let percent = Math.max(0, Math.min(100, ((score + 8) / 16) * 100));
+			valText.innerText = formatEval(val);
+			let percent;
+			
+			// Check if it's a Mate string
+			if (typeof val === 'string' && val.includes("M")) {
+				// If there is no '-' sign, white is winning
+				percent = val.includes("-") ? 0 : 100;
+			} else {
+				// Normal pawn math
+				let score = val / 100;
+				percent = ((score + 8) / 16) * 100;
+			}
+			// Keep the bar within 0% and 100%
+			percent = Math.max(0, Math.min(100, percent));
 			barWhite.style.height = (100 - percent) + "%";
 		}
 		
@@ -297,11 +310,16 @@
 			if (line.includes("info") && line.includes("score")) {
 				const parts = line.split(" ");
 				const cpIndex = parts.indexOf("cp");
-				if (cpIndex !== -1) {
+				const mateIndex = parts.indexOf("mate");
+				if (mateIndex !== -1) {
+					let moves = parts[mateIndex + 1];
+					latestScoredCP = (moves > 0 ? "M" : "-M") + Math.abs(moves);
+				} else if (cpIndex !== -1) {
 					latestScoredCP = parseInt(parts[cpIndex + 1]);
 					if (analysisPositions[currentMoveIndex].includes(" b ")) latestScoredCP = -latestScoredCP;
-					gotScoreForMove = true;
 				}
+				updateEvalBar(latestScoredCP);
+				gotScoreForMove = true;
 			}
 			if (line.startsWith("bestmove")) {
 				const bestMove = line.split(" ")[1];
@@ -309,7 +327,8 @@
 				analysisResults[currentMoveIndex].cp = latestScoredCP;
 				analysisResults[currentMoveIndex].r = getLocalRating(analysisResults[currentMoveIndex]);
 				if (currentMoveIndex + 1 < analysisResults.length) analysisResults[currentMoveIndex + 1].pcp = latestScoredCP;
-				
+
+				updateMoveView();
 				currentMoveIndex++;
 				gotScoreForMove = false;
 				analyzeNextPosition();
